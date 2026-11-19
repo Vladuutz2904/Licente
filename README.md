@@ -62,10 +62,10 @@ variabile.
 
 ## 4. Panou vizual de administrare (genereaza/revoca licente din browser)
 
-Dupa deploy, mergi la:
+Dupa deploy, mergi direct la:
 
 ```
-https://NUME-PROIECT.vercel.app/admin
+https://NUME-PROIECT.vercel.app/
 ```
 
 Te loghezi cu `ADMIN_USER` / `ADMIN_PASS` (cele din Environment Variables,
