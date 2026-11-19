@@ -280,7 +280,7 @@
           <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Licente totale</div></div>
           <div class="stat-card accent"><div class="num" id="statValid">—</div><div class="lbl">Active acum</div></div>
           <div class="stat-card warn"><div class="num" id="statExpired">—</div><div class="lbl">Expirate</div></div>
-          <div class="stat-card danger"><div class="num" id="statRevoked">—</div><div class="lbl">Revocate</div></div>
+          <div class="stat-card danger"><div class="num" id="statRevoked">—</div><div class="lbl">Dezactivate</div></div>
         </div>
         <div class="card">
           <h3>Cele mai recente</h3>
@@ -290,25 +290,32 @@
 
       <section class="view" id="view-generate">
         <div class="topline">
-          <div><h2>Genereaza cheie noua</h2><div class="sub">Creeaza o licenta pentru un client nou, sau reinnoieste una existenta</div></div>
+          <div><h2>Genereaza cheie noua</h2><div class="sub">Creeaza o licenta permanenta sau temporara pentru un panou</div></div>
         </div>
         <div class="grid-2">
           <div class="card">
             <h3>Detalii licenta</h3>
             <form id="createForm">
-              <div class="field">
-                <label>Domeniu client</label>
-                <input type="text" id="domain" placeholder="panoul-clientului.com" required>
-              </div>
               <div class="row2">
                 <div class="field">
+                  <label>Tip licenta</label>
+                  <select id="licType">
+                    <option value="temp">Temporara (pe zile)</option>
+                    <option value="perm">Permanenta</option>
+                  </select>
+                </div>
+                <div class="field" id="daysField">
                   <label>Valabilitate (zile)</label>
-                  <input type="number" id="days" value="30" min="1" required>
+                  <input type="number" id="days" value="30" min="1">
                 </div>
-                <div class="field">
-                  <label>Nota (optional)</label>
-                  <input type="text" id="note" placeholder="ex: plata noiembrie">
-                </div>
+              </div>
+              <div class="field">
+                <label>Domeniu panou (optional — daca il lasi gol, cheia se leaga de primul panou care o foloseste)</label>
+                <input type="text" id="domain" placeholder="panou.exemplu.com">
+              </div>
+              <div class="field">
+                <label>Nota (optional)</label>
+                <input type="text" id="note" placeholder="ex: Krashout">
               </div>
               <button class="btn btn-primary" type="submit" id="createBtn">Genereaza cheia</button>
             </form>
@@ -324,12 +331,13 @@
           <div class="card">
             <h3>Cum functioneaza</h3>
             <p style="color:var(--muted); font-size:13px; line-height:1.7; margin:0">
-              Fiecare licenta e legata de <b style="color:var(--fg)">domeniul</b> clientului.
-              Panoul lui verifica periodic acest server; daca licenta e valida, merge
-              normal, altfel se blocheaza fara sa stearga date.<br><br>
-              Cheia afisata e doar pentru referinta ta / a clientului — validarea reala
-              se face dupa domeniu. Daca reinnoiesti un domeniu existent, cheia ramane
-              aceeasi.
+              Generezi o <b style="color:var(--fg)">cheie</b> si o introduci in panoul tau
+              (Krashout sau alt panou) la prima intrare pe site.<br><br>
+              <b style="color:var(--fg)">Temporara</b> = expira automat dupa N zile.
+              <b style="color:var(--fg)">Permanenta</b> = nu expira niciodata.<br>
+              Din tabel poti oricand <b style="color:var(--fg)">dezactiva / activa</b>, prelungi,
+              schimba domeniul sau sterge. Panoul verifica serverul la cateva zeci de secunde,
+              deci orice schimbare se vede singura in panou.
             </p>
           </div>
         </div>
@@ -337,11 +345,11 @@
 
       <section class="view" id="view-licenses">
         <div class="topline">
-          <div><h2>Toate licentele</h2><div class="sub">Gestioneaza, revoca sau reactiveaza accesul clientilor</div></div>
+          <div><h2>Toate licentele</h2><div class="sub">Activeaza, dezactiveaza, prelungeste sau sterge licentele</div></div>
         </div>
         <div class="card">
           <div class="table-toolbar">
-            <input type="text" class="search-input" id="searchInput" placeholder="Cauta dupa domeniu sau nota...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Cauta dupa cheie, domeniu sau nota...">
             <button class="btn btn-ghost btn-sm" id="refreshBtn">&#8635; Reincarca</button>
           </div>
           <div id="tableWrap"></div>
@@ -353,6 +361,29 @@
 </div>
 
 <div id="toastWrap"></div>
+
+<div id="editWrap" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;z-index:1001;padding:20px;backdrop-filter:blur(2px)">
+  <div class="modal" style="max-width:420px">
+    <h4>Editeaza licenta</h4>
+    <p id="editKey" class="mono" style="margin-bottom:14px"></p>
+    <div class="field">
+      <label>Valabilitate</label>
+      <select id="editType">
+        <option value="keep">Las-o cum e</option>
+        <option value="add">Prelungeste cu N zile</option>
+        <option value="set">Seteaza: expira peste N zile de acum</option>
+        <option value="perm">Fa-o permanenta</option>
+      </select>
+    </div>
+    <div class="field" id="editDaysField"><label>Zile</label><input type="number" id="editDays" value="30" min="1"></div>
+    <div class="field"><label>Domeniu legat (gol = se leaga la urmatoarea folosire)</label><input type="text" id="editDomain"></div>
+    <div class="field"><label>Nota</label><input type="text" id="editNote"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="editCancel">Renunta</button>
+      <button class="btn btn-primary btn-sm" id="editSave">Salveaza</button>
+    </div>
+  </div>
+</div>
 
 <div id="modalWrap">
   <div class="modal">
@@ -458,7 +489,9 @@ async function api(path, opts = {}) {
     credentials: 'same-origin',
     body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  const data = await res.json().catch(() => ({}));
+  const raw = await res.text();
+  let data = {};
+  try { data = JSON.parse(raw); } catch { data = { reason: 'bad_response', error: 'Serverul nu a raspuns cu JSON (HTTP ' + res.status + '). ' + raw.replace(/<[^>]*>/g, ' ').trim().slice(0, 160) }; }
   return { ok: res.ok, status: res.status, data };
 }
 
@@ -528,16 +561,32 @@ document.querySelectorAll('.nav-item').forEach((item) => {
   });
 });
 
+function errText(data, status) {
+  const map = {
+    unauthorized: 'Sesiunea a expirat — logheaza-te din nou.',
+    kv_not_configured: 'Baza de date Redis nu e conectata pe Vercel (Storage -> Upstash Redis -> Connect, apoi Redeploy).',
+    invalid_days: 'Numar de zile invalid.',
+    not_found: 'Licenta nu mai exista.',
+  };
+  return map[data.reason] || data.error || data.reason || ('HTTP ' + status);
+}
+
+$('licType').addEventListener('change', () => {
+  $('daysField').style.display = $('licType').value === 'perm' ? 'none' : '';
+});
+
 $('createForm').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const permanent = $('licType').value === 'perm';
   $('createBtn').textContent = 'Se genereaza...';
   $('resultBox').style.display = 'none';
 
-  const { ok, data } = await api('/api/admin/panel-create', {
+  const { ok, status, data } = await api('/api/admin/panel-create', {
     method: 'POST',
     body: {
+      permanent,
+      days: permanent ? undefined : Number($('days').value),
       domain: $('domain').value.trim(),
-      days: Number($('days').value),
       note: $('note').value.trim(),
     },
   });
@@ -546,14 +595,15 @@ $('createForm').addEventListener('submit', async (e) => {
 
   if (ok && data.ok) {
     $('resultKey').textContent = data.key;
-    $('resultMeta').textContent = `Domeniu: ${data.domain} · valabila pana la ${new Date(data.expires).toLocaleString('ro-RO')}`;
+    $('resultMeta').textContent = (data.permanent ? 'Licenta PERMANENTA' : 'Valabila pana la ' + new Date(data.expires).toLocaleString('ro-RO'))
+      + (data.domain ? ' · domeniu: ' + data.domain : ' · se leaga de primul panou care o foloseste');
     $('resultBox').style.display = 'block';
     toast('Licenta a fost creata cu succes.');
     $('domain').value = '';
     $('note').value = '';
     loadAll();
   } else {
-    toast('Eroare: ' + (data.reason || 'necunoscuta'), true);
+    toast('Eroare: ' + errText(data, status), true);
   }
 });
 
@@ -563,7 +613,7 @@ $('copyKeyBtn').addEventListener('click', () => {
 
 async function loadAll() {
   const { ok, data } = await api('/api/admin/panel-list');
-  if (!ok || !data.ok) { toast('Nu am putut incarca licentele.', true); return; }
+  if (!ok || !data.ok) { toast('Nu am putut incarca licentele: ' + errText(data, 0), true); return; }
   allLicenses = data.licenses || [];
   renderStats();
   renderRecent();
@@ -577,14 +627,27 @@ function statusOf(lic) {
 }
 
 function renderStats() {
-  const total = allLicenses.length;
-  const valid = allLicenses.filter((l) => statusOf(l) === 'valid').length;
-  const expired = allLicenses.filter((l) => statusOf(l) === 'expired').length;
-  const revoked = allLicenses.filter((l) => statusOf(l) === 'revoked').length;
-  $('statTotal').textContent = total;
-  $('statValid').textContent = valid;
-  $('statExpired').textContent = expired;
-  $('statRevoked').textContent = revoked;
+  const count = (st) => allLicenses.filter((l) => statusOf(l) === st).length;
+  $('statTotal').textContent = allLicenses.length;
+  $('statValid').textContent = count('valid');
+  $('statExpired').textContent = count('expired');
+  $('statRevoked').textContent = count('revoked');
+}
+
+function expiryLabel(l) {
+  if (!l.expires) return 'Permanenta';
+  const d = new Date(l.expires).toLocaleDateString('ro-RO');
+  const left = Math.ceil((l.expires - Date.now()) / 86400000);
+  return left > 0 ? `${d} (${left} zile)` : `${d} (expirata)`;
+}
+
+function seenLabel(l) {
+  if (!l.lastSeen) return 'niciodata';
+  const m = Math.round((Date.now() - l.lastSeen) / 60000);
+  if (m < 1) return 'acum';
+  if (m < 60) return `acum ${m} min`;
+  if (m < 1440) return `acum ${Math.round(m / 60)} h`;
+  return new Date(l.lastSeen).toLocaleDateString('ro-RO');
 }
 
 function renderRecent() {
@@ -594,20 +657,17 @@ function renderRecent() {
     wrap.innerHTML = '<div class="empty-state"><div class="big">—</div>Nicio licenta inca. Genereaza prima din meniu.</div>';
     return;
   }
-  wrap.innerHTML = recent.map((l) => {
-    const st = statusOf(l);
-    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+  wrap.innerHTML = recent.map((l) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
       <div>
-        <div style="font-weight:600;font-size:13.5px">${escapeHtml(l.domain)}</div>
-        <div style="color:var(--muted);font-size:12px;margin-top:2px" class="mono">${l.key || ''}</div>
+        <div style="font-weight:600;font-size:13.5px" class="mono">${escapeHtml(l.key)}</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(l.domain || 'domeniu nelegat inca')} · ${expiryLabel(l)}</div>
       </div>
-      ${badge(st)}
-    </div>`;
-  }).join('');
+      ${badge(statusOf(l))}
+    </div>`).join('');
 }
 
 function badge(status) {
-  const map = { valid: ['valid', 'Activa'], expired: ['expired', 'Expirata'], revoked: ['revoked', 'Revocata'] };
+  const map = { valid: ['valid', 'Activa'], expired: ['expired', 'Expirata'], revoked: ['revoked', 'Dezactivata'] };
   const [cls, label] = map[status];
   return `<span class="badge ${cls}"><span class="dot"></span>${label}</span>`;
 }
@@ -620,7 +680,7 @@ function renderTable(filter = '') {
   const wrap = $('tableWrap');
   const f = filter.trim().toLowerCase();
   const rows = allLicenses
-    .filter((l) => !f || l.domain.toLowerCase().includes(f) || (l.note || '').toLowerCase().includes(f))
+    .filter((l) => !f || (l.key || '').toLowerCase().includes(f) || (l.domain || '').toLowerCase().includes(f) || (l.note || '').toLowerCase().includes(f))
     .sort((a, b) => (b.updated || 0) - (a.updated || 0));
 
   if (!rows.length) {
@@ -629,64 +689,87 @@ function renderTable(filter = '') {
   }
 
   wrap.innerHTML = `
-    <table>
-      <thead><tr><th>Domeniu</th><th>Cheie</th><th>Expira</th><th>Status</th><th>Nota</th><th></th></tr></thead>
+    <div style="overflow-x:auto"><table>
+      <thead><tr><th>Cheie</th><th>Domeniu</th><th>Expira</th><th>Status</th><th>Ultima verificare</th><th>Nota</th><th></th></tr></thead>
       <tbody>
         ${rows.map((l) => {
-          const st = statusOf(l);
-          const expiresStr = l.expires ? new Date(l.expires).toLocaleDateString('ro-RO') : '-';
+          const k = escapeHtml(l.key);
           return `<tr>
-            <td class="domain-cell">${escapeHtml(l.domain)}</td>
-            <td class="key-cell mono">${l.key || '-'} ${l.key ? `<button class="icon-btn" data-copy="${escapeHtml(l.key)}" title="Copiaza">&#10697;</button>` : ''}</td>
-            <td class="mono">${expiresStr}</td>
-            <td>${badge(st)}</td>
+            <td class="key-cell mono">${k} <button class="icon-btn" data-copy="${k}" title="Copiaza">&#10697;</button></td>
+            <td class="domain-cell">${escapeHtml(l.domain || '—')}</td>
+            <td class="mono">${expiryLabel(l)}</td>
+            <td>${badge(statusOf(l))}</td>
+            <td class="mono">${seenLabel(l)}</td>
             <td style="color:var(--muted)">${escapeHtml(l.note || '')}</td>
-            <td class="actions-cell">
+            <td class="actions-cell" style="white-space:nowrap">
               ${l.revoked
-                ? `<button class="icon-btn" data-reactivate="${escapeHtml(l.domain)}" title="Reactiveaza">&#9654;</button>`
-                : `<button class="icon-btn danger" data-revoke="${escapeHtml(l.domain)}" title="Revoca">&#9208;</button>`}
-              <button class="icon-btn danger" data-delete="${escapeHtml(l.domain)}" title="Sterge definitiv">&#10005;</button>
+                ? `<button class="icon-btn" data-activate="${k}" title="Activeaza">&#9654;</button>`
+                : `<button class="icon-btn danger" data-deactivate="${k}" title="Dezactiveaza">&#9208;</button>`}
+              <button class="icon-btn" data-edit="${k}" title="Editeaza / prelungeste">&#9998;</button>
+              <button class="icon-btn danger" data-delete="${k}" title="Sterge definitiv">&#10005;</button>
             </td>
           </tr>`;
         }).join('')}
       </tbody>
-    </table>
+    </table></div>
   `;
 
-  wrap.querySelectorAll('[data-copy]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      navigator.clipboard.writeText(btn.dataset.copy).then(() => toast('Cheie copiata.'));
-    });
+  const bind = (sel, fn) => wrap.querySelectorAll(sel).forEach((btn) => btn.addEventListener('click', () => fn(btn)));
+
+  bind('[data-copy]', (btn) => navigator.clipboard.writeText(btn.dataset.copy).then(() => toast('Cheie copiata.')));
+
+  bind('[data-deactivate]', async (btn) => {
+    const key = btn.dataset.deactivate;
+    if (!(await confirmModal('Dezactivezi licenta?', `${key} — panoul se blocheaza in cateva zeci de secunde. O poti activa oricand la loc.`))) return;
+    const { ok, status, data } = await api('/api/admin/panel-update', { method: 'POST', body: { key, active: false } });
+    if (ok) { toast('Licenta a fost dezactivata.'); loadAll(); } else toast('Eroare: ' + errText(data, status), true);
   });
-  wrap.querySelectorAll('[data-revoke]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const domain = btn.dataset.revoke;
-      const sure = await confirmModal('Revoci licenta?', `${domain} nu va mai putea folosi panoul pana cand reactivezi licenta sau generezi una noua.`);
-      if (!sure) return;
-      const { ok } = await api('/api/admin/panel-revoke', { method: 'POST', body: { domain } });
-      if (ok) { toast(`Licenta pentru ${domain} a fost revocata.`); loadAll(); }
-      else toast('Eroare la revocare.', true);
-    });
+
+  bind('[data-activate]', async (btn) => {
+    const key = btn.dataset.activate;
+    const { ok, status, data } = await api('/api/admin/panel-update', { method: 'POST', body: { key, active: true } });
+    if (ok) { toast('Licenta a fost activata.'); loadAll(); } else toast('Eroare: ' + errText(data, status), true);
   });
-  wrap.querySelectorAll('[data-reactivate]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const domain = btn.dataset.reactivate;
-      const { ok } = await api('/api/admin/panel-reactivate', { method: 'POST', body: { domain } });
-      if (ok) { toast(`Licenta pentru ${domain} a fost reactivata.`); loadAll(); }
-      else toast('Eroare la reactivare.', true);
-    });
+
+  bind('[data-delete]', async (btn) => {
+    const key = btn.dataset.delete;
+    if (!(await confirmModal('Stergi definitiv?', `${key} va fi stearsa complet, iar panoul care o foloseste se blocheaza. Nu poate fi recuperata.`))) return;
+    const { ok, status, data } = await api('/api/admin/panel-delete', { method: 'POST', body: { key } });
+    if (ok) { toast('Licenta a fost stearsa.'); loadAll(); } else toast('Eroare: ' + errText(data, status), true);
   });
-  wrap.querySelectorAll('[data-delete]').forEach((btn) => {
-    btn.addEventListener('click', async () => {
-      const domain = btn.dataset.delete;
-      const sure = await confirmModal('Stergi definitiv?', `Inregistrarea pentru ${domain} va fi stearsa complet. Nu poate fi recuperata.`);
-      if (!sure) return;
-      const { ok } = await api('/api/admin/panel-delete', { method: 'POST', body: { domain } });
-      if (ok) { toast(`Licenta pentru ${domain} a fost stearsa.`); loadAll(); }
-      else toast('Eroare la stergere.', true);
-    });
-  });
+
+  bind('[data-edit]', (btn) => openEdit(btn.dataset.edit));
 }
+
+/* ---------- editare licenta ---------- */
+let editingKey = null;
+function openEdit(key) {
+  const l = allLicenses.find((x) => x.key === key);
+  if (!l) return;
+  editingKey = key;
+  $('editKey').textContent = key + ' — ' + expiryLabel(l);
+  $('editType').value = 'keep';
+  $('editDays').value = 30;
+  $('editDomain').value = l.domain || '';
+  $('editNote').value = l.note || '';
+  $('editDaysField').style.display = 'none';
+  $('editWrap').style.display = 'flex';
+}
+$('editType').addEventListener('change', () => {
+  const v = $('editType').value;
+  $('editDaysField').style.display = (v === 'add' || v === 'set') ? '' : 'none';
+});
+$('editCancel').addEventListener('click', () => { $('editWrap').style.display = 'none'; });
+$('editSave').addEventListener('click', async () => {
+  const body = { key: editingKey, domain: $('editDomain').value.trim(), note: $('editNote').value.trim() };
+  const t = $('editType').value;
+  if (t === 'perm') body.permanent = true;
+  if (t === 'add') body.addDays = Number($('editDays').value);
+  if (t === 'set') body.days = Number($('editDays').value);
+  const { ok, status, data } = await api('/api/admin/panel-update', { method: 'POST', body });
+  if (ok) { $('editWrap').style.display = 'none'; toast('Licenta a fost actualizata.'); loadAll(); }
+  else toast('Eroare: ' + errText(data, status), true);
+});
 
 $('searchInput').addEventListener('input', (e) => renderTable(e.target.value));
 $('refreshBtn').addEventListener('click', () => loadAll());

@@ -1,38 +1,32 @@
-import { kv, keyFor } from '../../lib/kv.js';
+import { getKv } from '../../lib/kv.js';
 import { isAuthenticated } from '../../lib/auth.js';
-import { generateLicenseKey } from '../../lib/keygen.js';
+import { safe } from '../../lib/http.js';
+import { recKey, normDomain, computeExpires, createUniqueKey } from '../../lib/licenses.js';
 
-// POST /api/admin/panel-create  { domain, days, note }  - necesita sesiune (cookie) valida
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ ok: false, reason: 'method_not_allowed' });
+// POST /api/admin/panel-create  { days, permanent, domain?, note? }
+// permanent=true => licenta fara expirare; altfel "days" zile de la acum.
+export default safe(async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ ok: false, reason: 'method_not_allowed' });
+  if (!isAuthenticated(req)) return res.status(401).json({ ok: false, reason: 'unauthorized' });
+
+  const { days, permanent, domain, note } = req.body || {};
+  const expires = computeExpires(days, !!permanent);
+  if (expires === undefined) {
+    return res.status(400).json({ ok: false, reason: 'invalid_days', error: 'Pune un numar de zile mai mare ca 0 sau bifeaza "Permanenta".' });
   }
-  if (!isAuthenticated(req)) {
-    return res.status(401).json({ ok: false, reason: 'unauthorized' });
-  }
 
-  const { domain, days, note } = req.body || {};
-  if (!domain || !days) {
-    return res.status(400).json({ ok: false, reason: 'missing_domain_or_days' });
-  }
-
-  const k = keyFor(domain);
-  const existing = await kv.get(k);
-  // Pastram aceeasi cheie daca reinnoim o licenta existenta pe acelasi domeniu;
-  // generam una noua doar daca domeniul e nou.
-  const licenseKey = existing?.key || generateLicenseKey();
-
-  const expires = Date.now() + Number(days) * 24 * 60 * 60 * 1000;
+  const kv = getKv();
+  const key = await createUniqueKey(kv);
   const record = {
-    key: licenseKey,
-    expires,
+    key,
+    domain: normDomain(domain) || null, // gol => se leaga automat la prima folosire
+    expires,                            // null = permanenta
     revoked: false,
-    note: note || '',
-    created: existing?.created || Date.now(),
+    note: String(note || '').slice(0, 200),
+    created: Date.now(),
     updated: Date.now(),
   };
+  await kv.set(recKey(key), record);
 
-  await kv.set(k, record);
-
-  return res.status(200).json({ ok: true, domain, key: licenseKey, expires });
-}
+  return res.status(200).json({ ok: true, key, domain: record.domain, expires, permanent: expires === null });
+});

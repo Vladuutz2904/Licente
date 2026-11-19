@@ -1,4 +1,5 @@
-import { kv, keyFor } from '../../lib/kv.js';
+import { getKv, keyFor } from '../../lib/kv.js';
+const kv = new Proxy({}, { get: (_, p) => (...a) => getKv()[p](...a) });
 
 // POST /api/admin/license
 // Header: x-admin-secret: <ADMIN_SECRET din Vercel env>
