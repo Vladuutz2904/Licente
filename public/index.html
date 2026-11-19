@@ -2,13 +2,13 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8">
-<title>Craftelite — License Manager</title>
+<title>VladuutzPanel — License Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322d3a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230a0a0d'/%3E%3Cpath d='M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z' fill='url(%23g)'/%3E%3C/svg%3E">
 <style>
   :root {
     color-scheme: dark;
-    --bg: #0a0a0d;
-    --bg2: #0f0f14;
+    --bg: #07070a;
     --card: #15151c;
     --card2: #1a1a22;
     --border: #26262f;
@@ -25,10 +25,7 @@
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-    background:
-      radial-gradient(1200px 600px at 85% -10%, rgba(124,92,255,0.18), transparent 60%),
-      radial-gradient(900px 500px at -10% 110%, rgba(34,211,168,0.12), transparent 60%),
-      var(--bg);
+    background: var(--bg);
     color: var(--fg);
     font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
     min-height: 100%;
@@ -37,29 +34,49 @@
   button { font-family: inherit; cursor: pointer; }
   input { font-family: inherit; }
 
+  /* ---------- LOGO ---------- */
+  .logo-mark {
+    position: relative;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #1a1a24, #0e0e14);
+    border: 1px solid rgba(124,92,255,0.35);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1px rgba(124,92,255,0.05), 0 4px 18px rgba(124,92,255,0.25);
+  }
+  .logo-mark svg { display: block; }
+  .logo-mark.sm { width: 34px; height: 34px; }
+  .logo-mark.lg { width: 56px; height: 56px; border-radius: 16px; }
+
   /* ---------- LOGIN ---------- */
   #loginView {
-    min-height: 100vh;
-    display: flex; align-items: center; justify-content: center;
-    padding: 24px;
+    position: relative; min-height: 100vh; overflow: hidden;
+    display: flex; align-items: center; justify-content: center; padding: 24px;
+  }
+  #particleCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .login-glow {
+    position: absolute; width: 520px; height: 520px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,92,255,0.22), transparent 70%);
+    top: -120px; right: -120px; z-index: 0; pointer-events: none;
+    filter: blur(10px);
+  }
+  .login-glow.b {
+    background: radial-gradient(circle, rgba(34,211,168,0.16), transparent 70%);
+    top: auto; right: auto; bottom: -150px; left: -150px;
   }
   .login-card {
-    width: 100%; max-width: 380px;
-    background: linear-gradient(180deg, var(--card2), var(--card));
+    position: relative; z-index: 1;
+    width: 100%; max-width: 384px;
+    background: linear-gradient(180deg, rgba(26,26,34,0.9), rgba(21,21,28,0.92));
+    backdrop-filter: blur(14px);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 36px 32px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    padding: 38px 34px;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
   }
-  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
-  .brand-mark {
-    width: 34px; height: 34px; border-radius: 10px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    display: flex; align-items: center; justify-content: center;
-    font-weight: 800; font-size: 15px; color: #0a0a0d;
-  }
-  .brand-name { font-weight: 700; font-size: 15px; letter-spacing: 0.2px; }
-  .brand-sub { font-size: 11px; color: var(--muted); margin-top: -2px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: 0.2px; }
+  .brand-name .vlad { color: var(--accent2); }
+  .brand-sub { font-size: 11px; color: var(--muted); margin-top: 1px; letter-spacing: 0.03em; }
   .login-card h1 { font-size: 20px; margin: 0 0 4px; font-weight: 700; }
   .login-card p.hint { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
   .field { margin-bottom: 16px; }
@@ -75,7 +92,7 @@
     padding: 12px 16px; transition: transform 0.1s, opacity 0.15s, background 0.15s;
   }
   .btn:active { transform: scale(0.98); }
-  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), #9b7dff); color: #fff; margin-top: 6px; }
+  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), #9b7dff); color: #fff; margin-top: 6px; box-shadow: 0 8px 24px rgba(124,92,255,0.35); }
   .btn-primary:hover { opacity: 0.92; }
   .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--fg); }
   .btn-ghost:hover { background: var(--card2); }
@@ -199,12 +216,18 @@
 <body>
 
 <div id="loginView">
+  <canvas id="particleCanvas"></canvas>
+  <div class="login-glow"></div>
+  <div class="login-glow b"></div>
+
   <div class="login-card">
     <div class="brand">
-      <div class="brand-mark">CE</div>
+      <div class="logo-mark sm">
+        <svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3a8"/></linearGradient></defs><path d="M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z" fill="url(#lg1)"/></svg>
+      </div>
       <div>
-        <div class="brand-name">Craftelite</div>
-        <div class="brand-sub">License Manager</div>
+        <div class="brand-name">Vladuutz<span class="vlad">Panel</span></div>
+        <div class="brand-sub">LICENSE MANAGER</div>
       </div>
     </div>
     <h1>Autentificare</h1>
@@ -228,10 +251,12 @@
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">CE</div>
+        <div class="logo-mark sm">
+          <svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3a8"/></linearGradient></defs><path d="M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z" fill="url(#lg2)"/></svg>
+        </div>
         <div>
-          <div class="brand-name">Craftelite</div>
-          <div class="brand-sub">License Manager</div>
+          <div class="brand-name">Vladuutz<span class="vlad">Panel</span></div>
+          <div class="brand-sub">LICENSE MANAGER</div>
         </div>
       </div>
       <nav>
@@ -249,7 +274,7 @@
 
       <section class="view active" id="view-dashboard">
         <div class="topline">
-          <div><h2>Dashboard</h2><div class="sub">Privire generala asupra licentelor craftelite</div></div>
+          <div><h2>Dashboard</h2><div class="sub">Privire generala asupra licentelor VladuutzPanel</div></div>
         </div>
         <div class="stat-grid">
           <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Licente totale</div></div>
@@ -300,8 +325,8 @@
             <h3>Cum functioneaza</h3>
             <p style="color:var(--muted); font-size:13px; line-height:1.7; margin:0">
               Fiecare licenta e legata de <b style="color:var(--fg)">domeniul</b> clientului.
-              Panoul craftelite al clientului verifica periodic acest server; daca licenta
-              e valida, merge normal, altfel se blocheaza fara sa stearga date.<br><br>
+              Panoul lui verifica periodic acest server; daca licenta e valida, merge
+              normal, altfel se blocheaza fara sa stearga date.<br><br>
               Cheia afisata e doar pentru referinta ta / a clientului — validarea reala
               se face dupa domeniu. Daca reinnoiesti un domeniu existent, cheia ramane
               aceeasi.
@@ -341,6 +366,88 @@
 </div>
 
 <script>
+/* ===================== PARTICLE BACKGROUND ===================== */
+(function () {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  let w, h, particles;
+  const COUNT = 70;
+  const LINK_DIST = 130;
+  const mouse = { x: null, y: null };
+
+  function resize() {
+    w = canvas.width = canvas.offsetWidth * devicePixelRatio;
+    h = canvas.height = canvas.offsetHeight * devicePixelRatio;
+  }
+
+  function makeParticles() {
+    particles = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.35 * devicePixelRatio,
+      vy: (Math.random() - 0.5) * 0.35 * devicePixelRatio,
+      r: (Math.random() * 1.4 + 0.6) * devicePixelRatio,
+    }));
+  }
+
+  function step() {
+    ctx.clearRect(0, 0, w, h);
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.y += p.vy;
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
+
+      if (mouse.x !== null) {
+        const dx = p.x - mouse.x, dy = p.y - mouse.y;
+        const d = Math.hypot(dx, dy);
+        if (d < 160 * devicePixelRatio) {
+          const f = (1 - d / (160 * devicePixelRatio)) * 0.6;
+          p.vx += (dx / d) * f * 0.06;
+          p.vy += (dy / d) * f * 0.06;
+        }
+      }
+
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(180,170,255,0.55)';
+      ctx.fill();
+    }
+
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const a = particles[i], b = particles[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        const maxD = LINK_DIST * devicePixelRatio;
+        if (d < maxD) {
+          ctx.beginPath();
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(124,92,255,${0.16 * (1 - d / maxD)})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('resize', () => { resize(); });
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    mouse.x = (e.clientX - rect.left) * devicePixelRatio;
+    mouse.y = (e.clientY - rect.top) * devicePixelRatio;
+  });
+  canvas.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+
+  resize();
+  makeParticles();
+  step();
+})();
+
+/* ===================== APP LOGIC ===================== */
 const $ = (id) => document.getElementById(id);
 let allLicenses = [];
 

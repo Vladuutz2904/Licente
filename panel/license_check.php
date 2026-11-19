@@ -45,7 +45,7 @@ function license_remote_check($domain) {
 function license_block_page($reason) {
     http_response_code(402);
     echo '<!doctype html><html lang="ro"><head><meta charset="utf-8">';
-    echo '<title>Licenta inactiva</title></head><body style="font-family:sans-serif;text-align:center;padding:80px;">';
+    echo '<title>VladuutzPanel — Licenta inactiva</title></head><body style="font-family:sans-serif;text-align:center;padding:80px;">';
     echo '<h1>Acces suspendat</h1>';
     echo '<p>Panoul este temporar indisponibil din cauza unei licente inactive (' . htmlspecialchars($reason) . ').</p>';
     echo '<p>Contacteaza administratorul pentru reactivare. Datele tale nu au fost afectate.</p>';

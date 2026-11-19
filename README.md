@@ -1,4 +1,4 @@
-# Server de licente pentru craftelite (Vercel)
+# VladuutzPanel — server de licente pentru craftelite (Vercel)
 
 Ce face: tine o lista de licente (domeniu -> data expirarii) intr-o baza de
 date gratuita (Vercel KV, bazata pe Redis). Panoul PHP intreaba periodic
@@ -79,6 +79,8 @@ sau cele de rezerva daca nu le-ai setat inca). Panoul are:
 - **Licente** - tabel cu toate licentele, cautare dupa domeniu sau nota,
   si pentru fiecare: copiaza cheia, **revoca**, **reactiveaza** sau
   **sterge definitiv**.
+- Ecranul de login are logo propriu (fulger in gradient violet/verde) si
+  fundal animat cu particule care reactioneaza la miscarea mouse-ului.
 
 Sesiunea de login tine 12 ore (cookie securizat), dupa care trebuie sa te
 loghezi din nou.
