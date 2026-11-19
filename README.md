@@ -69,16 +69,25 @@ https://NUME-PROIECT.vercel.app/
 ```
 
 Te loghezi cu `ADMIN_USER` / `ADMIN_PASS` (cele din Environment Variables,
-sau cele de rezerva daca nu le-ai setat inca). De acolo poti:
+sau cele de rezerva daca nu le-ai setat inca). Panoul are:
 
-- **Genera o licenta noua** - completezi domeniul clientului, numarul de
-  zile si o nota optionala, apoi apesi "Genereaza".
-- **Vedea toate licentele** create, cu status (valida / expirata / revocata).
-- **Revoca** o licenta cu un click (ex. clientul nu a mai platit).
-- **Reactiva** o licenta revocata, tot cu un click.
+- **Dashboard** - cate licente ai in total, cate sunt active, expirate
+  sau revocate, plus ultimele 5 modificate.
+- **Genereaza cheie** - completezi domeniul clientului, numarul de zile
+  si o nota optionala. Primesti o cheie gen `CFTE-X7K2-9PQR-4MNB`, cu
+  buton de copiere, pe care o dai clientului ca referinta.
+- **Licente** - tabel cu toate licentele, cautare dupa domeniu sau nota,
+  si pentru fiecare: copiaza cheia, **revoca**, **reactiveaza** sau
+  **sterge definitiv**.
 
 Sesiunea de login tine 12 ore (cookie securizat), dupa care trebuie sa te
 loghezi din nou.
+
+**Despre cheia afisata:** validarea reala (facuta de `license_check.php`
+din panoul craftelite) se face dupa domeniu, nu dupa cheie - cheia e
+doar un cod de referinta frumos, pe care il dai clientului. Daca vrei
+ca si cheia sa fie verificata explicit de client (ex. o introduce manual
+undeva), spune-mi si adaug un endpoint separat pentru asta.
 
 ## 5. Testeaza din linia de comanda (optional)
 

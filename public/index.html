@@ -2,119 +2,347 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8">
-<title>Admin — Licente Craftelite</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Craftelite — License Manager</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>
   :root {
-    color-scheme: light dark;
-    --bg:#0b0b0c; --fg:#e8e8ea; --muted:#9a9aa2; --accent:#6ee7b7; --danger:#f87171;
-    --card:#16161a; --border:#232327; --input:#1e1e22;
-  }
-  @media (prefers-color-scheme: light) {
-    :root:not([data-theme="dark"]) {
-      --bg:#f4f4f6; --fg:#15151a; --muted:#5c5c66; --card:#ffffff; --border:#e3e3e8; --input:#f0f0f3;
-    }
+    color-scheme: dark;
+    --bg: #0a0a0d;
+    --bg2: #0f0f14;
+    --card: #15151c;
+    --card2: #1a1a22;
+    --border: #26262f;
+    --fg: #eceef1;
+    --muted: #8a8a96;
+    --accent: #7c5cff;
+    --accent2: #22d3a8;
+    --danger: #fb5c5c;
+    --warn: #f5b942;
+    --radius: 14px;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; margin: 0; }
   body {
-    background: var(--bg); color: var(--fg);
-    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    background:
+      radial-gradient(1200px 600px at 85% -10%, rgba(124,92,255,0.18), transparent 60%),
+      radial-gradient(900px 500px at -10% 110%, rgba(34,211,168,0.12), transparent 60%),
+      var(--bg);
+    color: var(--fg);
+    font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
+    min-height: 100%;
+  }
+  ::selection { background: rgba(124,92,255,0.35); }
+  button { font-family: inherit; cursor: pointer; }
+  input { font-family: inherit; }
+
+  /* ---------- LOGIN ---------- */
+  #loginView {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
     padding: 24px;
   }
-  .wrap { max-width: 720px; margin: 0 auto; }
+  .login-card {
+    width: 100%; max-width: 380px;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 36px 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .brand { display: flex; align-items: center; gap: 10px; margin-bottom: 26px; }
+  .brand-mark {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 15px; color: #0a0a0d;
+  }
+  .brand-name { font-weight: 700; font-size: 15px; letter-spacing: 0.2px; }
+  .brand-sub { font-size: 11px; color: var(--muted); margin-top: -2px; }
+  .login-card h1 { font-size: 20px; margin: 0 0 4px; font-weight: 700; }
+  .login-card p.hint { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
+  .field { margin-bottom: 16px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 7px; font-weight: 500; }
+  .field input {
+    width: 100%; background: #0d0d12; border: 1px solid var(--border);
+    color: var(--fg); padding: 12px 14px; border-radius: 10px; font-size: 14px;
+    transition: border-color 0.15s;
+  }
+  .field input:focus { outline: none; border-color: var(--accent); }
+  .btn {
+    border: none; border-radius: 10px; font-weight: 600; font-size: 14px;
+    padding: 12px 16px; transition: transform 0.1s, opacity 0.15s, background 0.15s;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), #9b7dff); color: #fff; margin-top: 6px; }
+  .btn-primary:hover { opacity: 0.92; }
+  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--fg); }
+  .btn-ghost:hover { background: var(--card2); }
+  .btn-danger { background: rgba(251,92,92,0.14); color: var(--danger); border: 1px solid rgba(251,92,92,0.25); }
+  .btn-danger:hover { background: rgba(251,92,92,0.22); }
+  .btn-sm { padding: 7px 12px; font-size: 12.5px; border-radius: 8px; }
+  .error-box {
+    margin-top: 14px; font-size: 13px; color: var(--danger);
+    background: rgba(251,92,92,0.1); border: 1px solid rgba(251,92,92,0.2);
+    border-radius: 8px; padding: 10px 12px; display: none;
+  }
+
+  /* ---------- APP SHELL ---------- */
+  #appView { display: none; min-height: 100vh; }
+  .shell { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: 240px; flex-shrink: 0;
+    background: rgba(255,255,255,0.015);
+    border-right: 1px solid var(--border);
+    padding: 22px 16px;
+    display: flex; flex-direction: column;
+  }
+  .sidebar .brand { padding: 0 6px; margin-bottom: 28px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 9px; margin-bottom: 2px;
+    color: var(--muted); font-size: 13.5px; font-weight: 500;
+    cursor: pointer; transition: background 0.12s, color 0.12s;
+    user-select: none;
+  }
+  .nav-item .ic { font-size: 15px; width: 18px; text-align: center; }
+  .nav-item:hover { background: var(--card2); color: var(--fg); }
+  .nav-item.active { background: rgba(124,92,255,0.14); color: #c9bbff; }
+  .sidebar-foot { margin-top: auto; padding: 0 6px; }
+  .sidebar-foot .who { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .sidebar-foot .who b { color: var(--fg); }
+
+  .main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
+  .topline { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
+  .topline h2 { margin: 0; font-size: 21px; font-weight: 700; }
+  .topline .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+
+  .view { display: none; }
+  .view.active { display: block; animation: fadein 0.25s ease; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .stat-card {
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px;
+  }
+  .stat-card .num { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
+  .stat-card .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-card.accent .num { color: var(--accent2); }
+  .stat-card.warn .num { color: var(--warn); }
+  .stat-card.danger .num { color: var(--danger); }
+
   .card {
-    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
-    padding: 28px 30px; margin-bottom: 20px;
+    background: linear-gradient(180deg, var(--card2), var(--card));
+    border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 26px; margin-bottom: 20px;
   }
-  h1 { font-size: 1.1rem; margin: 0 0 20px; }
-  label { display:block; font-size:0.78rem; color: var(--muted); margin-bottom:6px; margin-top:14px; }
-  input {
-    width:100%; background: var(--input); border:1px solid var(--border); color: var(--fg);
-    padding:10px 12px; border-radius:8px; font-family: inherit; font-size:0.9rem;
+  .card h3 { margin: 0 0 18px; font-size: 15px; font-weight: 700; }
+
+  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
+  @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  .field input, .field select { width: 100%; background: #0d0d12; border: 1px solid var(--border); color: var(--fg); padding: 11px 13px; border-radius: 9px; font-size: 13.5px; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .result-box {
+    display: none; margin-top: 16px; padding: 16px 18px; border-radius: 10px;
+    background: rgba(34,211,168,0.08); border: 1px solid rgba(34,211,168,0.25);
   }
-  button {
-    margin-top:18px; width:100%; padding:11px; border-radius:8px; border:none;
-    background: var(--accent); color:#06281c; font-weight:600; font-size:0.9rem; cursor:pointer;
-    font-family: inherit;
+  .result-box .rk-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
+  .result-box .rk-value { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px; font-weight: 700; color: var(--accent2); letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .copy-btn { background: var(--card2); border: 1px solid var(--border); color: var(--fg); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; }
+  .copy-btn:hover { background: #22222c; }
+  .result-box .rk-meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+  .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
+  .search-input { background: #0d0d12; border: 1px solid var(--border); color: var(--fg); padding: 9px 13px; border-radius: 9px; font-size: 13px; width: 240px; }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 10px 10px; border-bottom: 1px solid var(--border); }
+  tbody td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
+  tbody tr:hover { background: rgba(255,255,255,0.015); }
+  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.3px; }
+  .domain-cell { font-weight: 600; }
+  .key-cell { color: var(--muted); display: flex; align-items: center; gap: 6px; }
+  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
+  .badge.valid { background: rgba(34,211,168,0.13); color: var(--accent2); }
+  .badge.expired { background: rgba(245,185,66,0.13); color: var(--warn); }
+  .badge.revoked { background: rgba(251,92,92,0.13); color: var(--danger); }
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+  .actions-cell { display: flex; gap: 6px; }
+  .icon-btn { background: var(--card2); border: 1px solid var(--border); color: var(--muted); border-radius: 7px; padding: 6px 9px; font-size: 12px; }
+  .icon-btn:hover { color: var(--fg); background: #22222c; }
+  .icon-btn.danger:hover { color: var(--danger); border-color: rgba(251,92,92,0.3); }
+  .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 13.5px; }
+  .empty-state .big { font-size: 32px; margin-bottom: 10px; }
+
+  #toastWrap { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 8px; z-index: 999; }
+  .toast {
+    background: #18181f; border: 1px solid var(--border); border-left: 3px solid var(--accent2);
+    border-radius: 9px; padding: 12px 16px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    animation: slidein 0.2s ease; min-width: 220px;
   }
-  button.secondary { background: transparent; border:1px solid var(--border); color: var(--fg); font-weight:500; }
-  button.danger { background: var(--danger); color:#fff; }
-  button.small { width:auto; padding:6px 10px; font-size:0.78rem; margin-top:0; }
-  .msg { font-size:0.8rem; margin-top:10px; min-height: 1.2em; }
-  .msg.err { color: var(--danger); }
-  .msg.ok { color: var(--accent); }
-  .row { display:flex; gap:10px; }
-  .row > div { flex:1; }
-  table { width:100%; border-collapse: collapse; margin-top: 16px; font-size: 0.82rem; }
-  th, td { text-align:left; padding:8px 6px; border-bottom:1px solid var(--border); }
-  th { color: var(--muted); font-weight:500; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
-  .pill { padding:2px 8px; border-radius:999px; font-size:0.72rem; display:inline-block; }
-  .pill.valid { background: rgba(110,231,183,0.15); color: var(--accent); }
-  .pill.invalid { background: rgba(248,113,113,0.15); color: var(--danger); }
-  .actions button { margin: 0 4px 0 0; }
-  .top { display:flex; justify-content:space-between; align-items:center; margin-bottom: 4px; }
-  .muted { color: var(--muted); }
-  #panelView { display:none; }
+  .toast.err { border-left-color: var(--danger); }
+  @keyframes slidein { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  #modalWrap { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(2px); }
+  .modal { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; max-width: 380px; width: 100%; }
+  .modal h4 { margin: 0 0 8px; font-size: 15.5px; }
+  .modal p { margin: 0 0 20px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <!-- LOGIN -->
-  <div class="card" id="loginView">
-    <h1>Autentificare admin</h1>
+<div id="loginView">
+  <div class="login-card">
+    <div class="brand">
+      <div class="brand-mark">CE</div>
+      <div>
+        <div class="brand-name">Craftelite</div>
+        <div class="brand-sub">License Manager</div>
+      </div>
+    </div>
+    <h1>Autentificare</h1>
+    <p class="hint">Intra in panou pentru a gestiona licentele.</p>
     <form id="loginForm">
-      <label>Utilizator</label>
-      <input type="text" id="loginUser" autocomplete="username" required>
-      <label>Parola</label>
-      <input type="password" id="loginPass" autocomplete="current-password" required>
-      <button type="submit">Intra in panou</button>
-      <div class="msg err" id="loginMsg"></div>
+      <div class="field">
+        <label>Utilizator</label>
+        <input type="text" id="loginUser" autocomplete="username" required>
+      </div>
+      <div class="field">
+        <label>Parola</label>
+        <input type="password" id="loginPass" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary" type="submit" id="loginBtn">Intra in panou</button>
+      <div class="error-box" id="loginMsg"></div>
     </form>
   </div>
+</div>
 
-  <!-- PANEL -->
-  <div id="panelView">
-    <div class="card">
-      <div class="top">
-        <h1>Genereaza licenta noua</h1>
-        <button class="secondary small" id="logoutBtn" type="button">Iesi</button>
+<div id="appView">
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">CE</div>
+        <div>
+          <div class="brand-name">Craftelite</div>
+          <div class="brand-sub">License Manager</div>
+        </div>
       </div>
-      <form id="createForm">
-        <label>Domeniu client (ex: panoul-clientului.com)</label>
-        <input type="text" id="domain" required placeholder="panoul-clientului.com">
-        <div class="row">
-          <div>
-            <label>Zile valabilitate</label>
-            <input type="number" id="days" value="30" min="1" required>
+      <nav>
+        <div class="nav-item active" data-view="dashboard"><span class="ic">&#9670;</span> Dashboard</div>
+        <div class="nav-item" data-view="generate"><span class="ic">&#10022;</span> Genereaza cheie</div>
+        <div class="nav-item" data-view="licenses"><span class="ic">&#9636;</span> Licente</div>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="who">Logat ca <b id="whoName">admin</b></div>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn" style="width:100%">Iesi din cont</button>
+      </div>
+    </aside>
+
+    <main class="main">
+
+      <section class="view active" id="view-dashboard">
+        <div class="topline">
+          <div><h2>Dashboard</h2><div class="sub">Privire generala asupra licentelor craftelite</div></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Licente totale</div></div>
+          <div class="stat-card accent"><div class="num" id="statValid">—</div><div class="lbl">Active acum</div></div>
+          <div class="stat-card warn"><div class="num" id="statExpired">—</div><div class="lbl">Expirate</div></div>
+          <div class="stat-card danger"><div class="num" id="statRevoked">—</div><div class="lbl">Revocate</div></div>
+        </div>
+        <div class="card">
+          <h3>Cele mai recente</h3>
+          <div id="recentList"></div>
+        </div>
+      </section>
+
+      <section class="view" id="view-generate">
+        <div class="topline">
+          <div><h2>Genereaza cheie noua</h2><div class="sub">Creeaza o licenta pentru un client nou, sau reinnoieste una existenta</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <h3>Detalii licenta</h3>
+            <form id="createForm">
+              <div class="field">
+                <label>Domeniu client</label>
+                <input type="text" id="domain" placeholder="panoul-clientului.com" required>
+              </div>
+              <div class="row2">
+                <div class="field">
+                  <label>Valabilitate (zile)</label>
+                  <input type="number" id="days" value="30" min="1" required>
+                </div>
+                <div class="field">
+                  <label>Nota (optional)</label>
+                  <input type="text" id="note" placeholder="ex: plata noiembrie">
+                </div>
+              </div>
+              <button class="btn btn-primary" type="submit" id="createBtn">Genereaza cheia</button>
+            </form>
+            <div class="result-box" id="resultBox">
+              <div class="rk-label">Cheie licenta</div>
+              <div class="rk-value">
+                <span id="resultKey">—</span>
+                <button class="copy-btn" id="copyKeyBtn" type="button">Copiaza</button>
+              </div>
+              <div class="rk-meta" id="resultMeta"></div>
+            </div>
           </div>
-          <div>
-            <label>Nota (optional)</label>
-            <input type="text" id="note" placeholder="ex: plata noiembrie">
+          <div class="card">
+            <h3>Cum functioneaza</h3>
+            <p style="color:var(--muted); font-size:13px; line-height:1.7; margin:0">
+              Fiecare licenta e legata de <b style="color:var(--fg)">domeniul</b> clientului.
+              Panoul craftelite al clientului verifica periodic acest server; daca licenta
+              e valida, merge normal, altfel se blocheaza fara sa stearga date.<br><br>
+              Cheia afisata e doar pentru referinta ta / a clientului — validarea reala
+              se face dupa domeniu. Daca reinnoiesti un domeniu existent, cheia ramane
+              aceeasi.
+            </p>
           </div>
         </div>
-        <button type="submit">Genereaza / reinnoieste licenta</button>
-        <div class="msg" id="createMsg"></div>
-      </form>
-    </div>
+      </section>
 
-    <div class="card">
-      <h1>Licente existente</h1>
-      <div class="msg muted" id="listMsg">Se incarca...</div>
-      <table id="licTable" style="display:none">
-        <thead>
-          <tr><th>Domeniu</th><th>Expira</th><th>Status</th><th>Nota</th><th>Actiuni</th></tr>
-        </thead>
-        <tbody id="licBody"></tbody>
-      </table>
+      <section class="view" id="view-licenses">
+        <div class="topline">
+          <div><h2>Toate licentele</h2><div class="sub">Gestioneaza, revoca sau reactiveaza accesul clientilor</div></div>
+        </div>
+        <div class="card">
+          <div class="table-toolbar">
+            <input type="text" class="search-input" id="searchInput" placeholder="Cauta dupa domeniu sau nota...">
+            <button class="btn btn-ghost btn-sm" id="refreshBtn">&#8635; Reincarca</button>
+          </div>
+          <div id="tableWrap"></div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<div id="modalWrap">
+  <div class="modal">
+    <h4 id="modalTitle">Esti sigur?</h4>
+    <p id="modalText"></p>
+    <div class="modal-actions">
+      <button class="btn btn-ghost btn-sm" id="modalCancel">Renunta</button>
+      <button class="btn btn-danger btn-sm" id="modalConfirm">Confirma</button>
     </div>
   </div>
-
 </div>
 
 <script>
 const $ = (id) => document.getElementById(id);
+let allLicenses = [];
 
 async function api(path, opts = {}) {
   const res = await fetch(path, {
@@ -127,32 +355,55 @@ async function api(path, opts = {}) {
   return { ok: res.ok, status: res.status, data };
 }
 
-function showPanel() {
-  $('loginView').style.display = 'none';
-  $('panelView').style.display = 'block';
-  loadLicenses();
+function toast(msg, isErr = false) {
+  const el = document.createElement('div');
+  el.className = 'toast' + (isErr ? ' err' : '');
+  el.textContent = msg;
+  $('toastWrap').appendChild(el);
+  setTimeout(() => el.remove(), 3500);
 }
-function showLogin() {
-  $('panelView').style.display = 'none';
-  $('loginView').style.display = 'block';
+
+function confirmModal(title, text) {
+  return new Promise((resolve) => {
+    $('modalTitle').textContent = title;
+    $('modalText').textContent = text;
+    $('modalWrap').style.display = 'flex';
+    const cleanup = (val) => { $('modalWrap').style.display = 'none'; resolve(val); };
+    $('modalConfirm').onclick = () => cleanup(true);
+    $('modalCancel').onclick = () => cleanup(false);
+  });
 }
 
 async function checkSession() {
   const { data } = await api('/api/admin/session');
-  if (data.authenticated) showPanel(); else showLogin();
+  if (data.authenticated) showApp(); else showLogin();
+}
+function showApp() {
+  $('loginView').style.display = 'none';
+  $('appView').style.display = 'block';
+  loadAll();
+}
+function showLogin() {
+  $('appView').style.display = 'none';
+  $('loginView').style.display = 'flex';
 }
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  $('loginMsg').textContent = '';
+  const msg = $('loginMsg');
+  msg.style.display = 'none';
+  $('loginBtn').textContent = 'Se verifica...';
   const { ok, data } = await api('/api/admin/login', {
     method: 'POST',
     body: { username: $('loginUser').value, password: $('loginPass').value },
   });
+  $('loginBtn').textContent = 'Intra in panou';
   if (ok && data.ok) {
-    showPanel();
+    $('whoName').textContent = $('loginUser').value;
+    showApp();
   } else {
-    $('loginMsg').textContent = 'Utilizator sau parola gresita.';
+    msg.textContent = 'Utilizator sau parola gresita.';
+    msg.style.display = 'block';
   }
 });
 
@@ -161,11 +412,19 @@ $('logoutBtn').addEventListener('click', async () => {
   showLogin();
 });
 
+document.querySelectorAll('.nav-item').forEach((item) => {
+  item.addEventListener('click', () => {
+    document.querySelectorAll('.nav-item').forEach((i) => i.classList.remove('active'));
+    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+    item.classList.add('active');
+    $('view-' + item.dataset.view).classList.add('active');
+  });
+});
+
 $('createForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const msg = $('createMsg');
-  msg.className = 'msg';
-  msg.textContent = 'Se salveaza...';
+  $('createBtn').textContent = 'Se genereaza...';
+  $('resultBox').style.display = 'none';
 
   const { ok, data } = await api('/api/admin/panel-create', {
     method: 'POST',
@@ -176,82 +435,154 @@ $('createForm').addEventListener('submit', async (e) => {
     },
   });
 
+  $('createBtn').textContent = 'Genereaza cheia';
+
   if (ok && data.ok) {
-    msg.className = 'msg ok';
-    msg.textContent = `Licenta activa pentru ${data.domain} pana la ${new Date(data.expires).toLocaleString('ro-RO')}.`;
+    $('resultKey').textContent = data.key;
+    $('resultMeta').textContent = `Domeniu: ${data.domain} · valabila pana la ${new Date(data.expires).toLocaleString('ro-RO')}`;
+    $('resultBox').style.display = 'block';
+    toast('Licenta a fost creata cu succes.');
     $('domain').value = '';
     $('note').value = '';
-    loadLicenses();
+    loadAll();
   } else {
-    msg.className = 'msg err';
-    msg.textContent = 'Eroare: ' + (data.reason || 'necunoscuta');
+    toast('Eroare: ' + (data.reason || 'necunoscuta'), true);
   }
 });
 
-async function loadLicenses() {
-  const listMsg = $('listMsg');
-  const table = $('licTable');
-  const body = $('licBody');
+$('copyKeyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText($('resultKey').textContent).then(() => toast('Cheie copiata.'));
+});
 
-  listMsg.textContent = 'Se incarca...';
-  table.style.display = 'none';
-
+async function loadAll() {
   const { ok, data } = await api('/api/admin/panel-list');
-  if (!ok || !data.ok) {
-    listMsg.textContent = 'Nu am putut incarca licentele.';
+  if (!ok || !data.ok) { toast('Nu am putut incarca licentele.', true); return; }
+  allLicenses = data.licenses || [];
+  renderStats();
+  renderRecent();
+  renderTable($('searchInput').value);
+}
+
+function statusOf(lic) {
+  if (lic.revoked) return 'revoked';
+  if (lic.expires && Date.now() > lic.expires) return 'expired';
+  return 'valid';
+}
+
+function renderStats() {
+  const total = allLicenses.length;
+  const valid = allLicenses.filter((l) => statusOf(l) === 'valid').length;
+  const expired = allLicenses.filter((l) => statusOf(l) === 'expired').length;
+  const revoked = allLicenses.filter((l) => statusOf(l) === 'revoked').length;
+  $('statTotal').textContent = total;
+  $('statValid').textContent = valid;
+  $('statExpired').textContent = expired;
+  $('statRevoked').textContent = revoked;
+}
+
+function renderRecent() {
+  const recent = [...allLicenses].sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, 5);
+  const wrap = $('recentList');
+  if (!recent.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="big">—</div>Nicio licenta inca. Genereaza prima din meniu.</div>';
+    return;
+  }
+  wrap.innerHTML = recent.map((l) => {
+    const st = statusOf(l);
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+      <div>
+        <div style="font-weight:600;font-size:13.5px">${escapeHtml(l.domain)}</div>
+        <div style="color:var(--muted);font-size:12px;margin-top:2px" class="mono">${l.key || ''}</div>
+      </div>
+      ${badge(st)}
+    </div>`;
+  }).join('');
+}
+
+function badge(status) {
+  const map = { valid: ['valid', 'Activa'], expired: ['expired', 'Expirata'], revoked: ['revoked', 'Revocata'] };
+  const [cls, label] = map[status];
+  return `<span class="badge ${cls}"><span class="dot"></span>${label}</span>`;
+}
+
+function escapeHtml(s) {
+  return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+}
+
+function renderTable(filter = '') {
+  const wrap = $('tableWrap');
+  const f = filter.trim().toLowerCase();
+  const rows = allLicenses
+    .filter((l) => !f || l.domain.toLowerCase().includes(f) || (l.note || '').toLowerCase().includes(f))
+    .sort((a, b) => (b.updated || 0) - (a.updated || 0));
+
+  if (!rows.length) {
+    wrap.innerHTML = '<div class="empty-state"><div class="big">&#9636;</div>Nicio licenta gasita.</div>';
     return;
   }
 
-  if (!data.licenses.length) {
-    listMsg.textContent = 'Nicio licenta creata inca.';
-    return;
-  }
+  wrap.innerHTML = `
+    <table>
+      <thead><tr><th>Domeniu</th><th>Cheie</th><th>Expira</th><th>Status</th><th>Nota</th><th></th></tr></thead>
+      <tbody>
+        ${rows.map((l) => {
+          const st = statusOf(l);
+          const expiresStr = l.expires ? new Date(l.expires).toLocaleDateString('ro-RO') : '-';
+          return `<tr>
+            <td class="domain-cell">${escapeHtml(l.domain)}</td>
+            <td class="key-cell mono">${l.key || '-'} ${l.key ? `<button class="icon-btn" data-copy="${escapeHtml(l.key)}" title="Copiaza">&#10697;</button>` : ''}</td>
+            <td class="mono">${expiresStr}</td>
+            <td>${badge(st)}</td>
+            <td style="color:var(--muted)">${escapeHtml(l.note || '')}</td>
+            <td class="actions-cell">
+              ${l.revoked
+                ? `<button class="icon-btn" data-reactivate="${escapeHtml(l.domain)}" title="Reactiveaza">&#9654;</button>`
+                : `<button class="icon-btn danger" data-revoke="${escapeHtml(l.domain)}" title="Revoca">&#9208;</button>`}
+              <button class="icon-btn danger" data-delete="${escapeHtml(l.domain)}" title="Sterge definitiv">&#10005;</button>
+            </td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
 
-  listMsg.textContent = '';
-  body.innerHTML = '';
-
-  data.licenses.forEach((lic) => {
-    const expired = lic.expires && Date.now() > lic.expires;
-    const invalid = lic.revoked || expired;
-    const tr = document.createElement('tr');
-
-    const expiresStr = lic.expires ? new Date(lic.expires).toLocaleDateString('ro-RO') : '-';
-    const statusLabel = lic.revoked ? 'revocata' : (expired ? 'expirata' : 'valida');
-
-    tr.innerHTML = `
-      <td>${lic.domain}</td>
-      <td>${expiresStr}</td>
-      <td><span class="pill ${invalid ? 'invalid' : 'valid'}">${statusLabel}</span></td>
-      <td class="muted">${lic.note || ''}</td>
-      <td class="actions"></td>
-    `;
-
-    const actionsCell = tr.querySelector('.actions');
-
-    if (lic.revoked) {
-      const reactivateBtn = document.createElement('button');
-      reactivateBtn.className = 'secondary small';
-      reactivateBtn.textContent = 'Reactiveaza';
-      reactivateBtn.onclick = () => doAction('panel-reactivate', lic.domain);
-      actionsCell.appendChild(reactivateBtn);
-    } else {
-      const revokeBtn = document.createElement('button');
-      revokeBtn.className = 'danger small';
-      revokeBtn.textContent = 'Revoca';
-      revokeBtn.onclick = () => doAction('panel-revoke', lic.domain);
-      actionsCell.appendChild(revokeBtn);
-    }
-
-    body.appendChild(tr);
+  wrap.querySelectorAll('[data-copy]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      navigator.clipboard.writeText(btn.dataset.copy).then(() => toast('Cheie copiata.'));
+    });
   });
-
-  table.style.display = 'table';
+  wrap.querySelectorAll('[data-revoke]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const domain = btn.dataset.revoke;
+      const sure = await confirmModal('Revoci licenta?', `${domain} nu va mai putea folosi panoul pana cand reactivezi licenta sau generezi una noua.`);
+      if (!sure) return;
+      const { ok } = await api('/api/admin/panel-revoke', { method: 'POST', body: { domain } });
+      if (ok) { toast(`Licenta pentru ${domain} a fost revocata.`); loadAll(); }
+      else toast('Eroare la revocare.', true);
+    });
+  });
+  wrap.querySelectorAll('[data-reactivate]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const domain = btn.dataset.reactivate;
+      const { ok } = await api('/api/admin/panel-reactivate', { method: 'POST', body: { domain } });
+      if (ok) { toast(`Licenta pentru ${domain} a fost reactivata.`); loadAll(); }
+      else toast('Eroare la reactivare.', true);
+    });
+  });
+  wrap.querySelectorAll('[data-delete]').forEach((btn) => {
+    btn.addEventListener('click', async () => {
+      const domain = btn.dataset.delete;
+      const sure = await confirmModal('Stergi definitiv?', `Inregistrarea pentru ${domain} va fi stearsa complet. Nu poate fi recuperata.`);
+      if (!sure) return;
+      const { ok } = await api('/api/admin/panel-delete', { method: 'POST', body: { domain } });
+      if (ok) { toast(`Licenta pentru ${domain} a fost stearsa.`); loadAll(); }
+      else toast('Eroare la stergere.', true);
+    });
+  });
 }
 
-async function doAction(endpoint, domain) {
-  await api(`/api/admin/${endpoint}`, { method: 'POST', body: { domain } });
-  loadLicenses();
-}
+$('searchInput').addEventListener('input', (e) => renderTable(e.target.value));
+$('refreshBtn').addEventListener('click', () => loadAll());
 
 checkSession();
 </script>
