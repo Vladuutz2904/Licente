@@ -1,4 +1,4 @@
-# VladuutzPanel — server de licente pentru craftelite (Vercel)
+# VladuutzWeb — server de licente pentru craftelite (Vercel)
 
 Ce face: tine o lista de licente (domeniu -> data expirarii) intr-o baza de
 date gratuita (Vercel KV, bazata pe Redis). Panoul PHP intreaba periodic

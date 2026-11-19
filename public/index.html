@@ -2,299 +2,635 @@
 <html lang="ro">
 <head>
 <meta charset="utf-8">
-<title>VladuutzPanel — License Manager</title>
+<title>VladuutzWeb — License Manager</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%237c5cff'/%3E%3Cstop offset='1' stop-color='%2322d3a8'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='24' fill='%230a0a0d'/%3E%3Cpath d='M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z' fill='url(%23g)'/%3E%3C/svg%3E">
+<meta name="theme-color" content="#05080d">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<link rel="apple-touch-icon" href="/assets/favicon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+  @property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+
   :root {
     color-scheme: dark;
-    --bg: #07070a;
-    --card: #15151c;
-    --card2: #1a1a22;
-    --border: #26262f;
-    --fg: #eceef1;
-    --muted: #8a8a96;
-    --accent: #7c5cff;
-    --accent2: #22d3a8;
-    --danger: #fb5c5c;
-    --warn: #f5b942;
-    --radius: 14px;
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #04070c;
+    --bg2: #070b12;
+    --card: rgba(16, 22, 34, 0.72);
+    --card-solid: #0e1420;
+    --card2: #131b2a;
+    --border: rgba(120, 160, 210, 0.14);
+    --border-strong: rgba(120, 170, 230, 0.28);
+    --fg: #eaf2fb;
+    --muted: #8493a8;
+    --cyan: #22e0f5;
+    --blue: #1f8fe6;
+    --orange: #ff8a1f;
+    --amber: #ffb836;
+    --ok: #2ee6b0;
+    --danger: #ff5d6c;
+    --brand: linear-gradient(135deg, #22e0f5 0%, #1f8fe6 100%);
+    --brand-soft: linear-gradient(135deg, rgba(34,224,245,.16), rgba(31,143,230,.1));
+    --radius: 18px;
+    --font: 'Inter', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-d: 'Montserrat', 'Inter', -apple-system, 'Segoe UI', sans-serif;
   }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; margin: 0; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
   body {
     background: var(--bg);
     color: var(--fg);
-    font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, sans-serif;
-    min-height: 100%;
+    font-family: var(--font);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  ::selection { background: rgba(124,92,255,0.35); }
+  ::selection { background: rgba(34,224,245,0.3); }
   button { font-family: inherit; cursor: pointer; }
-  input { font-family: inherit; }
+  input, select { font-family: inherit; }
+  .i { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex-shrink: 0; }
+  .mono { font-family: ui-monospace, 'JetBrains Mono', Menlo, Consolas, monospace; }
 
-  /* ---------- LOGO ---------- */
-  .logo-mark {
-    position: relative;
-    border-radius: 11px;
-    background: linear-gradient(135deg, #1a1a24, #0e0e14);
-    border: 1px solid rgba(124,92,255,0.35);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 0 0 1px rgba(124,92,255,0.05), 0 4px 18px rgba(124,92,255,0.25);
-  }
-  .logo-mark svg { display: block; }
-  .logo-mark.sm { width: 34px; height: 34px; }
-  .logo-mark.lg { width: 56px; height: 56px; border-radius: 16px; }
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: #1d2738; border-radius: 10px; border: 2px solid var(--bg); }
 
-  /* ---------- LOGIN ---------- */
+  /* ====================================================== LOGIN */
   #loginView {
-    position: relative; min-height: 100vh; overflow: hidden;
-    display: flex; align-items: center; justify-content: center; padding: 24px;
+    position: relative; min-height: 100vh; min-height: 100dvh; overflow: hidden auto;
+    display: flex; align-items: center; justify-content: center;
+    padding: 28px 20px; perspective: 1200px;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 0%, #0b1a2c 0%, transparent 70%),
+      var(--bg);
   }
-  #particleCanvas { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
-  .login-glow {
-    position: absolute; width: 520px; height: 520px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(124,92,255,0.22), transparent 70%);
-    top: -120px; right: -120px; z-index: 0; pointer-events: none;
-    filter: blur(10px);
+  #particleCanvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  .grid-bg {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image:
+      linear-gradient(rgba(80,140,220,.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(80,140,220,.06) 1px, transparent 1px);
+    background-size: 56px 56px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 40%, #000 20%, transparent 75%);
+    animation: gridmove 24s linear infinite;
   }
-  .login-glow.b {
-    background: radial-gradient(circle, rgba(34,211,168,0.16), transparent 70%);
-    top: auto; right: auto; bottom: -150px; left: -150px;
+  @keyframes gridmove { to { background-position: 56px 56px, 56px 56px; } }
+  .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .aurora i { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .55; will-change: transform; }
+  .aurora .a1 { width: 520px; height: 520px; background: #1f8fe6; top: -180px; left: -140px; animation: drift1 18s ease-in-out infinite alternate; }
+  .aurora .a2 { width: 460px; height: 460px; background: #22e0f5; bottom: -200px; right: -120px; opacity: .35; animation: drift2 22s ease-in-out infinite alternate; }
+  .aurora .a3 { width: 360px; height: 360px; background: #ff8a1f; bottom: 10%; left: -120px; opacity: .22; animation: drift3 26s ease-in-out infinite alternate; }
+  @keyframes drift1 { to { transform: translate(160px, 120px) scale(1.15); } }
+  @keyframes drift2 { to { transform: translate(-180px, -90px) scale(1.2); } }
+  @keyframes drift3 { to { transform: translate(220px, -80px) scale(.85); } }
+
+  .login-stage {
+    position: relative; z-index: 1; width: 100%; max-width: 400px;
+    display: flex; flex-direction: column; align-items: center;
+    transform-style: preserve-3d;
   }
+
+  /* ---- logo plutitor ---- */
+  .logo-float {
+    position: relative; width: clamp(230px, 62vw, 310px); margin-bottom: 6px;
+    transform: translate3d(var(--px, 0px), var(--py, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+    transition: transform .25s ease-out;
+  }
+  .logo-bob { position: relative; animation: bob 5.2s ease-in-out infinite; }
+  @keyframes bob {
+    0%, 100% { transform: translateY(0) rotate(-1.2deg); }
+    50%      { transform: translateY(-18px) rotate(1.2deg); }
+  }
+  .logo-img {
+    display: block; width: 100%; height: auto; position: relative; z-index: 2;
+    filter: drop-shadow(0 10px 30px rgba(34,224,245,.35)) drop-shadow(0 0 60px rgba(31,143,230,.25));
+    animation: glowpulse 4s ease-in-out infinite;
+    user-select: none; -webkit-user-drag: none;
+  }
+  @keyframes glowpulse {
+    0%, 100% { filter: drop-shadow(0 10px 26px rgba(34,224,245,.28)) drop-shadow(0 0 50px rgba(31,143,230,.2)); }
+    50%      { filter: drop-shadow(0 14px 38px rgba(255,138,31,.38)) drop-shadow(0 0 80px rgba(34,224,245,.38)); }
+  }
+  .logo-halo {
+    position: absolute; z-index: 1; left: 50%; top: 38%; width: 120%; aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(circle, rgba(34,224,245,.22), rgba(31,143,230,.1) 40%, transparent 68%);
+    border-radius: 50%; animation: halo 4s ease-in-out infinite;
+  }
+  @keyframes halo { 0%, 100% { opacity: .65; transform: translate(-50%, -50%) scale(.95); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
+  .logo-orbit { position: absolute; z-index: 3; left: 50%; top: 38%; width: 118%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+  .logo-orbit .ring { position: absolute; inset: 0; animation: spin 16s linear infinite; }
+  .logo-orbit .ring.r2 { inset: 9%; animation-duration: 24s; animation-direction: reverse; }
+  .logo-orbit .ring::before {
+    content: ''; position: absolute; inset: 0; border-radius: 50%;
+    border: 1px dashed rgba(120,190,255,.14);
+  }
+  .logo-orbit .dot { position: absolute; width: 7px; height: 7px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 12px 3px rgba(34,224,245,.8); top: 0; left: 50%; margin-left: -3.5px; }
+  .logo-orbit .ring.r2 .dot { background: var(--orange); box-shadow: 0 0 12px 3px rgba(255,138,31,.8); width: 6px; height: 6px; top: auto; bottom: 0; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .logo-shadow {
+    width: 56%; height: 14px; margin: 10px auto 0; border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(34,224,245,.38), transparent 70%);
+    filter: blur(5px); animation: shadowpulse 5.2s ease-in-out infinite;
+  }
+  @keyframes shadowpulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(.62); opacity: .4; } }
+  .sparkles span {
+    position: absolute; z-index: 3; width: 4px; height: 4px; border-radius: 50%; background: #fff;
+    box-shadow: 0 0 10px 2px rgba(120,220,255,.9); opacity: 0; animation: twinkle 3.6s ease-in-out infinite;
+  }
+  .sparkles span:nth-child(1) { left: 8%;  top: 20%; animation-delay: 0s; }
+  .sparkles span:nth-child(2) { left: 90%; top: 12%; animation-delay: .9s; }
+  .sparkles span:nth-child(3) { left: 78%; top: 66%; animation-delay: 1.7s; }
+  .sparkles span:nth-child(4) { left: 20%; top: 78%; animation-delay: 2.4s; }
+  .sparkles span:nth-child(5) { left: 52%; top: -4%; animation-delay: 3s; }
+  @keyframes twinkle { 0%, 100% { opacity: 0; transform: scale(.4); } 50% { opacity: 1; transform: scale(1.4); } }
+
+  /* ---- card login ---- */
   .login-card {
-    position: relative; z-index: 1;
-    width: 100%; max-width: 384px;
-    background: linear-gradient(180deg, rgba(26,26,34,0.9), rgba(21,21,28,0.92));
-    backdrop-filter: blur(14px);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 38px 34px;
-    box-shadow: 0 30px 80px rgba(0,0,0,0.55);
+    position: relative; width: 100%; margin-top: 8px;
+    background: linear-gradient(180deg, rgba(20,28,43,.82), rgba(12,18,29,.9));
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+    border-radius: 22px; padding: 32px 30px 28px;
+    box-shadow: 0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+    animation: cardin .8s cubic-bezier(.2,.8,.2,1) both .1s;
   }
-  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
-  .brand-name { font-weight: 800; font-size: 17px; letter-spacing: 0.2px; }
-  .brand-name .vlad { color: var(--accent2); }
-  .brand-sub { font-size: 11px; color: var(--muted); margin-top: 1px; letter-spacing: 0.03em; }
-  .login-card h1 { font-size: 20px; margin: 0 0 4px; font-weight: 700; }
-  .login-card p.hint { color: var(--muted); font-size: 13px; margin: 0 0 24px; }
+  .login-card::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: conic-gradient(from var(--ang), rgba(34,224,245,.0), rgba(34,224,245,.75), rgba(31,143,230,.0) 30%, rgba(255,138,31,.7) 55%, rgba(255,138,31,0) 70%, rgba(34,224,245,.0));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude;
+    animation: rotate-border 7s linear infinite;
+  }
+  @keyframes rotate-border { to { --ang: 360deg; } }
+  @keyframes cardin { from { opacity: 0; transform: translateY(26px) scale(.97); } to { opacity: 1; transform: none; } }
+  .login-card h1 { font-family: var(--font-d); font-size: 22px; margin: 0 0 4px; font-weight: 700; letter-spacing: -.2px; }
+  .login-card p.hint { color: var(--muted); font-size: 13px; margin: 0 0 22px; }
+  .tagline { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--cyan); background: rgba(34,224,245,.08); border: 1px solid rgba(34,224,245,.2); padding: 5px 10px; border-radius: 99px; margin-bottom: 14px; }
+  .tagline::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: blink 2s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+
   .field { margin-bottom: 16px; }
   .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 7px; font-weight: 500; }
-  .field input {
-    width: 100%; background: #0d0d12; border: 1px solid var(--border);
-    color: var(--fg); padding: 12px 14px; border-radius: 10px; font-size: 14px;
-    transition: border-color 0.15s;
+  .input-wrap { position: relative; }
+  .input-wrap > .i { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; transition: color .15s; }
+  .input-wrap:focus-within > .i { color: var(--cyan); }
+  .input-wrap input { padding-left: 40px !important; }
+  .eye { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--muted); padding: 8px; border-radius: 8px; display: flex; }
+  .eye:hover { color: var(--fg); }
+  .field input, .field select {
+    width: 100%; background: rgba(5,9,15,.7); border: 1px solid var(--border);
+    color: var(--fg); padding: 12px 14px; border-radius: 12px; font-size: 14px;
+    transition: border-color .15s, box-shadow .15s, background .15s;
   }
-  .field input:focus { outline: none; border-color: var(--accent); }
+  .field input::placeholder { color: #4b586b; }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(34,224,245,.12); background: rgba(5,9,15,.9); }
+  .field select { appearance: none; -webkit-appearance: none; padding-right: 36px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%238493a8' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 12px center; }
+  .field select option { background: #0e1420; }
+
   .btn {
-    border: none; border-radius: 10px; font-weight: 600; font-size: 14px;
-    padding: 12px 16px; transition: transform 0.1s, opacity 0.15s, background 0.15s;
+    border: none; border-radius: 12px; font-weight: 600; font-size: 14px;
+    padding: 12px 18px; transition: transform .12s, opacity .15s, background .15s, box-shadow .2s, border-color .15s;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; position: relative; overflow: hidden;
   }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { width: 100%; background: linear-gradient(135deg, var(--accent), #9b7dff); color: #fff; margin-top: 6px; box-shadow: 0 8px 24px rgba(124,92,255,0.35); }
-  .btn-primary:hover { opacity: 0.92; }
-  .btn-ghost { background: transparent; border: 1px solid var(--border); color: var(--fg); }
-  .btn-ghost:hover { background: var(--card2); }
-  .btn-danger { background: rgba(251,92,92,0.14); color: var(--danger); border: 1px solid rgba(251,92,92,0.25); }
-  .btn-danger:hover { background: rgba(251,92,92,0.22); }
-  .btn-sm { padding: 7px 12px; font-size: 12.5px; border-radius: 8px; }
+  .btn:active { transform: scale(.97); }
+  .btn-primary { width: 100%; background: var(--brand); color: #04101a; margin-top: 6px; box-shadow: 0 10px 30px rgba(31,143,230,.38); font-weight: 700; }
+  .btn-primary::after { content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform: skewX(-20deg); transition: left .6s; }
+  .btn-primary:hover { box-shadow: 0 14px 38px rgba(34,224,245,.42); transform: translateY(-1px); }
+  .btn-primary:hover::after { left: 140%; }
+  .btn-primary:disabled { opacity: .7; cursor: wait; }
+  .btn-ghost { background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--fg); }
+  .btn-ghost:hover { background: rgba(255,255,255,.07); border-color: var(--border-strong); }
+  .btn-danger { background: rgba(255,93,108,.14); color: var(--danger); border: 1px solid rgba(255,93,108,.28); }
+  .btn-danger:hover { background: rgba(255,93,108,.24); }
+  .btn-sm { padding: 8px 13px; font-size: 12.5px; border-radius: 10px; }
+  .btn-auto { width: auto; margin-top: 0; }
   .error-box {
     margin-top: 14px; font-size: 13px; color: var(--danger);
-    background: rgba(251,92,92,0.1); border: 1px solid rgba(251,92,92,0.2);
-    border-radius: 8px; padding: 10px 12px; display: none;
+    background: rgba(255,93,108,.09); border: 1px solid rgba(255,93,108,.25);
+    border-radius: 10px; padding: 10px 12px; display: none;
   }
+  .error-box.shake { animation: shake .4s; }
+  @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+  .login-foot { margin-top: 18px; font-size: 11.5px; color: #4f5d72; text-align: center; letter-spacing: .02em; }
 
-  /* ---------- APP SHELL ---------- */
-  #appView { display: none; min-height: 100vh; }
-  .shell { display: flex; min-height: 100vh; }
+  /* ====================================================== APP SHELL */
+  #appView { display: none; min-height: 100vh; position: relative; }
+  #appView::before {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background:
+      radial-gradient(ellipse 50% 40% at 85% -5%, rgba(31,143,230,.16), transparent 70%),
+      radial-gradient(ellipse 40% 35% at 0% 100%, rgba(255,138,31,.08), transparent 70%);
+  }
+  .shell { display: flex; min-height: 100vh; position: relative; z-index: 1; }
 
   .sidebar {
-    width: 240px; flex-shrink: 0;
-    background: rgba(255,255,255,0.015);
+    width: 264px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; align-self: flex-start;
+    background: linear-gradient(180deg, rgba(12,18,29,.9), rgba(7,11,18,.9));
+    backdrop-filter: blur(12px);
     border-right: 1px solid var(--border);
-    padding: 22px 16px;
+    padding: 22px 16px 18px;
     display: flex; flex-direction: column;
   }
-  .sidebar .brand { padding: 0 6px; margin-bottom: 28px; }
+  .brand { display: flex; align-items: center; gap: 12px; padding: 0 6px; margin-bottom: 30px; }
+  .brand-logo { width: 54px; flex-shrink: 0; filter: drop-shadow(0 4px 14px rgba(34,224,245,.35)); animation: mini-float 4.5s ease-in-out infinite; }
+  @keyframes mini-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+  .brand-name { font-family: var(--font-d); font-weight: 800; font-size: 16.5px; letter-spacing: .1px; line-height: 1.1; }
+  .brand-name .web { background: linear-gradient(90deg, #22e0f5, #1f8fe6); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .brand-sub { font-size: 9.5px; color: var(--muted); margin-top: 4px; letter-spacing: .16em; font-weight: 600; }
+
+  .nav-label { font-size: 10.5px; color: #55647a; letter-spacing: .14em; font-weight: 700; padding: 0 12px; margin: 0 0 8px; }
   .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 12px; border-radius: 9px; margin-bottom: 2px;
+    position: relative; display: flex; align-items: center; gap: 12px;
+    padding: 11px 13px; border-radius: 12px; margin-bottom: 4px;
     color: var(--muted); font-size: 13.5px; font-weight: 500;
-    cursor: pointer; transition: background 0.12s, color 0.12s;
+    cursor: pointer; transition: background .15s, color .15s, transform .15s;
     user-select: none;
   }
-  .nav-item .ic { font-size: 15px; width: 18px; text-align: center; }
-  .nav-item:hover { background: var(--card2); color: var(--fg); }
-  .nav-item.active { background: rgba(124,92,255,0.14); color: #c9bbff; }
-  .sidebar-foot { margin-top: auto; padding: 0 6px; }
-  .sidebar-foot .who { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
-  .sidebar-foot .who b { color: var(--fg); }
+  .nav-item:hover { background: rgba(255,255,255,.04); color: var(--fg); transform: translateX(2px); }
+  .nav-item.active { background: var(--brand-soft); color: #fff; box-shadow: inset 0 0 0 1px rgba(34,224,245,.2); }
+  .nav-item.active .i { color: var(--cyan); }
+  .nav-item.active::before { content: ''; position: absolute; left: -16px; top: 22%; bottom: 22%; width: 3px; border-radius: 0 4px 4px 0; background: var(--brand); box-shadow: 0 0 12px var(--cyan); }
+  .nav-count { margin-left: auto; font-size: 11px; font-weight: 700; background: rgba(255,255,255,.07); color: var(--muted); padding: 2px 8px; border-radius: 99px; }
+  .nav-item.active .nav-count { background: rgba(34,224,245,.18); color: var(--cyan); }
 
-  .main { flex: 1; min-width: 0; padding: 28px 32px 60px; }
-  .topline { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 22px; flex-wrap: wrap; gap: 10px; }
-  .topline h2 { margin: 0; font-size: 21px; font-weight: 700; }
-  .topline .sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .sidebar-foot { margin-top: auto; }
+  .user-card { display: flex; align-items: center; gap: 11px; padding: 12px; border-radius: 14px; background: rgba(255,255,255,.03); border: 1px solid var(--border); margin-bottom: 10px; }
+  .avatar { width: 36px; height: 36px; border-radius: 11px; background: var(--brand); color: #04101a; font-weight: 800; display: flex; align-items: center; justify-content: center; font-family: var(--font-d); flex-shrink: 0; text-transform: uppercase; }
+  .user-card .who { font-size: 11.5px; color: var(--muted); line-height: 1.35; min-width: 0; }
+  .user-card .who b { color: var(--fg); font-size: 13px; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-card .online { color: var(--ok); }
+
+  .main { flex: 1; min-width: 0; padding: 26px 34px 70px; max-width: 1280px; }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 26px; flex-wrap: wrap; }
+  .topbar h2 { margin: 0; font-family: var(--font-d); font-size: 24px; font-weight: 700; letter-spacing: -.3px; }
+  .topbar .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
+  .top-actions { display: flex; gap: 8px; align-items: center; }
+  .only-mobile { display: none; }
 
   .view { display: none; }
-  .view.active { display: block; animation: fadein 0.25s ease; }
-  @keyframes fadein { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  .view.active { display: block; animation: fadein .35s cubic-bezier(.2,.8,.2,1); }
+  @keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin-bottom: 26px; }
-  .stat-card {
-    background: linear-gradient(180deg, var(--card2), var(--card));
-    border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px;
+  /* hero */
+  .hero {
+    position: relative; overflow: hidden; border-radius: 22px; padding: 28px 30px; margin-bottom: 20px;
+    background:
+      radial-gradient(ellipse 60% 120% at 100% 50%, rgba(34,224,245,.18), transparent 70%),
+      linear-gradient(135deg, #0f1b2e 0%, #0b1320 60%, #130f0a 140%);
+    border: 1px solid var(--border-strong);
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
   }
-  .stat-card .num { font-size: 26px; font-weight: 800; letter-spacing: -0.5px; }
-  .stat-card .lbl { font-size: 12px; color: var(--muted); margin-top: 4px; }
-  .stat-card.accent .num { color: var(--accent2); }
-  .stat-card.warn .num { color: var(--warn); }
-  .stat-card.danger .num { color: var(--danger); }
+  .hero::after { content: ''; position: absolute; right: -60px; top: -60px; width: 240px; height: 240px; border-radius: 50%; border: 1px dashed rgba(34,224,245,.18); animation: spin 30s linear infinite; }
+  .hero h3 { margin: 0 0 6px; font-family: var(--font-d); font-size: 22px; font-weight: 700; }
+  .hero h3 span { background: var(--brand); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .hero p { margin: 0 0 18px; color: var(--muted); font-size: 13.5px; max-width: 440px; line-height: 1.55; }
+  .hero-logo { width: 150px; flex-shrink: 0; position: relative; z-index: 1; animation: bob 5s ease-in-out infinite; filter: drop-shadow(0 10px 28px rgba(34,224,245,.4)); }
+
+  /* stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px; margin-bottom: 20px; }
+  .stat-card {
+    position: relative; overflow: hidden;
+    background: var(--card); backdrop-filter: blur(10px);
+    border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+    transition: transform .2s, border-color .2s, box-shadow .2s;
+  }
+  .stat-card:hover { transform: translateY(-3px); border-color: var(--border-strong); box-shadow: 0 16px 40px rgba(0,0,0,.35); }
+  .stat-card::after { content: ''; position: absolute; right: -30px; top: -30px; width: 110px; height: 110px; border-radius: 50%; background: radial-gradient(circle, var(--tint, rgba(34,224,245,.18)), transparent 70%); }
+  .stat-ic { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: var(--tint-bg, rgba(34,224,245,.12)); color: var(--tint-fg, var(--cyan)); margin-bottom: 16px; position: relative; z-index: 1; }
+  .stat-card .num { font-family: var(--font-d); font-size: 30px; font-weight: 800; letter-spacing: -.8px; position: relative; z-index: 1; }
+  .stat-card .lbl { font-size: 12.5px; color: var(--muted); margin-top: 3px; position: relative; z-index: 1; }
+  .stat-card.accent { --tint: rgba(46,230,176,.2); --tint-bg: rgba(46,230,176,.12); --tint-fg: var(--ok); }
+  .stat-card.warn   { --tint: rgba(255,138,31,.2);  --tint-bg: rgba(255,138,31,.12);  --tint-fg: var(--orange); }
+  .stat-card.danger { --tint: rgba(255,93,108,.2);  --tint-bg: rgba(255,93,108,.12);  --tint-fg: var(--danger); }
 
   .card {
-    background: linear-gradient(180deg, var(--card2), var(--card));
+    background: var(--card); backdrop-filter: blur(10px);
     border: 1px solid var(--border); border-radius: var(--radius);
     padding: 24px 26px; margin-bottom: 20px;
   }
-  .card h3 { margin: 0 0 18px; font-size: 15px; font-weight: 700; }
+  .card h3 { margin: 0 0 18px; font-family: var(--font-d); font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 9px; }
+  .card h3 .i { color: var(--cyan); width: 17px; height: 17px; }
+  .card h3 .link { margin-left: auto; font-family: var(--font); font-size: 12px; font-weight: 600; color: var(--cyan); cursor: pointer; }
+  .card h3 .link:hover { text-decoration: underline; }
 
-  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; }
-  @media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } }
-
-  .field input, .field select { width: 100%; background: #0d0d12; border: 1px solid var(--border); color: var(--fg); padding: 11px 13px; border-radius: 9px; font-size: 13.5px; }
-  .field input:focus, .field select:focus { outline: none; border-color: var(--accent); }
+  .grid-2 { display: grid; grid-template-columns: 1.3fr 1fr; gap: 16px; align-items: start; }
+  .grid-2b { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-2 > .card, .grid-2b > .card { margin-bottom: 0; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
+  /* distributie */
+  .dist-bar { display: flex; height: 12px; border-radius: 99px; overflow: hidden; background: rgba(255,255,255,.05); margin-bottom: 18px; gap: 2px; }
+  .dist-bar span { display: block; height: 100%; transition: width .8s cubic-bezier(.2,.8,.2,1); min-width: 0; }
+  .dist-bar .d-valid { background: linear-gradient(90deg, #2ee6b0, #22e0f5); }
+  .dist-bar .d-expired { background: var(--orange); }
+  .dist-bar .d-revoked { background: var(--danger); }
+  .legend { display: grid; gap: 12px; }
+  .legend div { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+  .legend b { margin-left: auto; color: var(--fg); font-family: var(--font-d); }
+  .legend i { width: 10px; height: 10px; border-radius: 4px; display: block; }
+
+  .li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.05); }
+  .li:last-child { border-bottom: none; padding-bottom: 0; }
+  .li:first-child { padding-top: 0; }
+  .li .k { font-weight: 600; font-size: 13px; }
+  .li .m { color: var(--muted); font-size: 12px; margin-top: 3px; }
+
   .result-box {
-    display: none; margin-top: 16px; padding: 16px 18px; border-radius: 10px;
-    background: rgba(34,211,168,0.08); border: 1px solid rgba(34,211,168,0.25);
+    display: none; margin-top: 18px; padding: 18px; border-radius: 14px;
+    background: linear-gradient(135deg, rgba(46,230,176,.09), rgba(34,224,245,.06));
+    border: 1px solid rgba(46,230,176,.3); animation: fadein .4s;
   }
-  .result-box .rk-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 6px; }
-  .result-box .rk-value { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 16px; font-weight: 700; color: var(--accent2); letter-spacing: 0.5px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .copy-btn { background: var(--card2); border: 1px solid var(--border); color: var(--fg); border-radius: 7px; padding: 5px 10px; font-size: 11.5px; }
-  .copy-btn:hover { background: #22222c; }
-  .result-box .rk-meta { margin-top: 8px; font-size: 12px; color: var(--muted); }
+  .result-box .rk-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; font-weight: 600; }
+  .result-box .rk-value { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 17px; font-weight: 700; color: var(--ok); letter-spacing: .5px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .copy-btn { background: rgba(255,255,255,.06); border: 1px solid var(--border); color: var(--fg); border-radius: 9px; padding: 6px 11px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; font-weight: 600; }
+  .copy-btn:hover { background: rgba(255,255,255,.12); }
+  .result-box .rk-meta { margin-top: 10px; font-size: 12px; color: var(--muted); }
 
-  .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; flex-wrap: wrap; }
-  .search-input { background: #0d0d12; border: 1px solid var(--border); color: var(--fg); padding: 9px 13px; border-radius: 9px; font-size: 13px; width: 240px; }
-  .search-input:focus { outline: none; border-color: var(--accent); }
-  table { width: 100%; border-collapse: collapse; font-size: 13px; }
-  thead th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; padding: 0 10px 10px; border-bottom: 1px solid var(--border); }
-  tbody td { padding: 12px 10px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: middle; }
-  tbody tr:hover { background: rgba(255,255,255,0.015); }
-  .mono { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.3px; }
+  .steps { margin: 0; padding: 0; list-style: none; display: grid; gap: 16px; }
+  .steps li { display: flex; gap: 13px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+  .steps li b { color: var(--fg); }
+  .steps .n { width: 26px; height: 26px; flex-shrink: 0; border-radius: 9px; background: var(--brand-soft); border: 1px solid rgba(34,224,245,.25); color: var(--cyan); font-weight: 700; font-size: 12px; display: flex; align-items: center; justify-content: center; font-family: var(--font-d); }
+
+  /* tabel */
+  .table-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  .search-wrap { position: relative; flex: 1; min-width: 200px; max-width: 340px; }
+  .search-wrap .i { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); width: 16px; height: 16px; }
+  .search-input { width: 100%; background: rgba(5,9,15,.7); border: 1px solid var(--border); color: var(--fg); padding: 10px 13px 10px 38px; border-radius: 12px; font-size: 13px; transition: border-color .15s, box-shadow .15s; }
+  .search-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(34,224,245,.1); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+  .chip { background: rgba(255,255,255,.03); border: 1px solid var(--border); color: var(--muted); padding: 7px 12px; border-radius: 99px; font-size: 12px; font-weight: 600; display: inline-flex; gap: 7px; align-items: center; transition: all .15s; }
+  .chip:hover { color: var(--fg); border-color: var(--border-strong); }
+  .chip.on { background: var(--brand-soft); color: #fff; border-color: rgba(34,224,245,.4); }
+  .chip em { font-style: normal; font-size: 10.5px; background: rgba(255,255,255,.08); border-radius: 99px; padding: 1px 7px; }
+
+  table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13px; }
+  thead th { text-align: left; color: var(--muted); font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; padding: 0 12px 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  tbody td { padding: 14px 12px; border-bottom: 1px solid rgba(255,255,255,.04); vertical-align: middle; }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(34,224,245,.035); }
+  tbody tr:last-child td { border-bottom: none; }
   .domain-cell { font-weight: 600; }
-  .key-cell { color: var(--muted); display: flex; align-items: center; gap: 6px; }
-  .badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 999px; font-size: 11.5px; font-weight: 600; }
-  .badge.valid { background: rgba(34,211,168,0.13); color: var(--accent2); }
-  .badge.expired { background: rgba(245,185,66,0.13); color: var(--warn); }
-  .badge.revoked { background: rgba(251,92,92,0.13); color: var(--danger); }
+  .domain-cell small { display: block; color: var(--muted); font-weight: 400; font-size: 11.5px; margin-top: 3px; }
+  .key-cell { white-space: nowrap; }
+  .key-cell .kv { display: inline-flex; align-items: center; gap: 8px; color: #c8d8ee; font-size: 12.5px; background: rgba(255,255,255,.04); border: 1px solid var(--border); padding: 5px 6px 5px 10px; border-radius: 9px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+  .badge.valid { background: rgba(46,230,176,.12); color: var(--ok); }
+  .badge.expired { background: rgba(255,138,31,.13); color: var(--orange); }
+  .badge.revoked { background: rgba(255,93,108,.13); color: var(--danger); }
   .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-  .actions-cell { display: flex; gap: 6px; }
-  .icon-btn { background: var(--card2); border: 1px solid var(--border); color: var(--muted); border-radius: 7px; padding: 6px 9px; font-size: 12px; }
-  .icon-btn:hover { color: var(--fg); background: #22222c; }
-  .icon-btn.danger:hover { color: var(--danger); border-color: rgba(251,92,92,0.3); }
-  .empty-state { text-align: center; padding: 50px 20px; color: var(--muted); font-size: 13.5px; }
-  .empty-state .big { font-size: 32px; margin-bottom: 10px; }
+  .badge.valid .dot { box-shadow: 0 0 8px currentColor; animation: blink 2.4s infinite; }
+  .exp { font-size: 12.5px; }
+  .exp small { display: block; color: var(--muted); margin-top: 3px; font-size: 11.5px; }
+  .exp small.low { color: var(--amber); }
+  .exp small.over { color: var(--orange); }
+  .perm-tag { display: inline-flex; gap: 6px; align-items: center; color: var(--cyan); font-weight: 600; }
+  .actions-cell { white-space: nowrap; text-align: right; }
+  .actions-cell .wrap { display: inline-flex; gap: 6px; }
+  .icon-btn { background: rgba(255,255,255,.04); border: 1px solid var(--border); color: var(--muted); border-radius: 9px; width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; transition: all .15s; padding: 0; }
+  .icon-btn .i { width: 15px; height: 15px; }
+  .icon-btn:hover { color: var(--fg); background: rgba(255,255,255,.1); transform: translateY(-1px); }
+  .icon-btn.go:hover { color: var(--ok); border-color: rgba(46,230,176,.4); }
+  .icon-btn.danger:hover { color: var(--danger); border-color: rgba(255,93,108,.4); }
+  .icon-btn.sm { width: 24px; height: 24px; border-radius: 7px; }
+  .icon-btn.sm .i { width: 13px; height: 13px; }
+  .empty-state { text-align: center; padding: 56px 20px; color: var(--muted); font-size: 13.5px; }
+  .empty-state .big { width: 62px; height: 62px; border-radius: 20px; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; background: var(--brand-soft); color: var(--cyan); border: 1px solid rgba(34,224,245,.2); }
+  .empty-state .big .i { width: 26px; height: 26px; }
+  .skeleton { height: 14px; border-radius: 8px; background: linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.1), rgba(255,255,255,.04)); background-size: 200% 100%; animation: shimmer 1.2s infinite; margin: 14px 0; }
+  @keyframes shimmer { to { background-position: -200% 0; } }
 
-  #toastWrap { position: fixed; bottom: 22px; right: 22px; display: flex; flex-direction: column; gap: 8px; z-index: 999; }
+  /* toast */
+  #toastWrap { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
   .toast {
-    background: #18181f; border: 1px solid var(--border); border-left: 3px solid var(--accent2);
-    border-radius: 9px; padding: 12px 16px; font-size: 13px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-    animation: slidein 0.2s ease; min-width: 220px;
+    display: flex; align-items: center; gap: 11px;
+    background: rgba(14,20,32,.96); backdrop-filter: blur(14px); border: 1px solid var(--border-strong);
+    border-radius: 14px; padding: 13px 16px; font-size: 13px; box-shadow: 0 14px 40px rgba(0,0,0,.5);
+    animation: slidein .3s cubic-bezier(.2,.8,.2,1); min-width: 240px; max-width: 360px;
   }
-  .toast.err { border-left-color: var(--danger); }
-  @keyframes slidein { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+  .toast .i { color: var(--ok); }
+  .toast.err .i { color: var(--danger); }
+  .toast.out { opacity: 0; transform: translateX(20px); transition: all .25s; }
+  @keyframes slidein { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
 
-  #modalWrap { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.55); align-items: center; justify-content: center; z-index: 1000; padding: 20px; backdrop-filter: blur(2px); }
-  .modal { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px 26px; max-width: 380px; width: 100%; }
-  .modal h4 { margin: 0 0 8px; font-size: 15.5px; }
-  .modal p { margin: 0 0 20px; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(2,5,10,.66); align-items: center; justify-content: center; z-index: 1500; padding: 20px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+  .modal { background: linear-gradient(180deg, #121a29, #0d1420); border: 1px solid var(--border-strong); border-radius: 20px; padding: 26px; max-width: 400px; width: 100%; box-shadow: 0 30px 90px rgba(0,0,0,.65); animation: pop .25s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop { from { opacity: 0; transform: scale(.94) translateY(10px); } to { opacity: 1; transform: none; } }
+  .modal h4 { margin: 0 0 8px; font-family: var(--font-d); font-size: 16.5px; }
+  .modal p { margin: 0 0 20px; color: var(--muted); font-size: 13.5px; line-height: 1.55; }
   .modal .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .modal .btn-primary { width: auto; margin-top: 0; }
+
+  /* ====================================================== RESPONSIVE */
+  @media (max-width: 1000px) {
+    .grid-2, .grid-2b { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 860px) {
+    .sidebar {
+      position: fixed; z-index: 900; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom, 0px)); top: auto;
+      width: auto; height: auto; padding: 8px; flex-direction: row; border: 1px solid var(--border-strong); border-radius: 20px;
+      background: rgba(10,15,24,.92); box-shadow: 0 16px 50px rgba(0,0,0,.6);
+    }
+    .sidebar .brand, .sidebar .sidebar-foot, .nav-label { display: none; }
+    .sidebar nav { display: flex; width: 100%; gap: 4px; }
+    .nav-item { flex: 1; flex-direction: column; gap: 4px; padding: 9px 4px; font-size: 10.5px; margin: 0; text-align: center; justify-content: center; }
+    .nav-item:hover { transform: none; }
+    .nav-item.active::before { display: none; }
+    .nav-count { display: none; }
+    .main { padding: 18px 16px calc(100px + env(safe-area-inset-bottom, 0px)); }
+    .only-mobile { display: inline-flex; }
+    .topbar h2 { font-size: 20px; }
+    .hero { padding: 22px 20px; }
+    .hero-logo { width: 96px; }
+    #toastWrap { left: 16px; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+    .toast { max-width: none; }
+    .row2 { grid-template-columns: 1fr; gap: 0; }
+    .card { padding: 20px 18px; }
+
+    /* tabel -> carduri */
+    table, thead, tbody, tr, td { display: block; }
+    thead { display: none; }
+    tbody tr { background: rgba(255,255,255,.025); border: 1px solid var(--border); border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; }
+    tbody td { border: none; padding: 7px 0; display: flex; justify-content: space-between; align-items: center; gap: 14px; text-align: right; }
+    tbody td::before { font-family: var(--font); content: attr(data-label); color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; font-weight: 600; text-align: left; flex-shrink: 0; }
+    tbody td.actions-cell { justify-content: flex-end; padding-top: 12px; margin-top: 6px; border-top: 1px solid var(--border); }
+    tbody td.actions-cell::before { display: none; }
+  }
+  @media (max-width: 480px) {
+    .login-card { padding: 26px 22px 22px; }
+    .hero-logo { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
 </style>
 </head>
 <body>
 
+<!-- sprite iconite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-dash" viewBox="0 0 24 24"><rect x="3" y="3" width="7.5" height="9" rx="2"/><rect x="13.5" y="3" width="7.5" height="5.5" rx="2"/><rect x="13.5" y="11.5" width="7.5" height="9.5" rx="2"/><rect x="3" y="15" width="7.5" height="6" rx="2"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="7.5" cy="15.5" r="4.5"/><path d="m10.7 12.3 9.8-9.8M16 7l3 3M13.5 9.5l2 2"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A9.7 9.7 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4M6.5 6.6C3.8 8.4 2 12 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16M3 12A9 9 0 0 1 18.5 5.7L21 8"/><path d="M21 3v5h-5M3 21v-5h5"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5-12-7.5Z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></symbol>
+    <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 6.5V12l3.5 2"/></symbol>
+    <symbol id="i-ban" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="m5.3 5.3 13.4 13.4"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5ZM3 13l9 5 9-5M3 17.5l9 5 9-5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-infinity" viewBox="0 0 24 24"><path d="M12 12c-2-2.7-3.8-4.5-6-4.5a4.5 4.5 0 0 0 0 9c2.2 0 4-1.8 6-4.5Zm0 0c2 2.7 3.8 4.5 6 4.5a4.5 4.5 0 0 0 0-9c-2.2 0-4 1.8-6 4.5Z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3 4 6v6c0 4.5 3.2 8 8 9 4.8-1 8-4.5 8-9V6l-8-3Z"/><path d="m9 12 2.2 2.2L15.5 10"/></symbol>
+  </defs>
+</svg>
+
+<!-- ============================================================ LOGIN -->
 <div id="loginView">
   <canvas id="particleCanvas"></canvas>
-  <div class="login-glow"></div>
-  <div class="login-glow b"></div>
+  <div class="grid-bg"></div>
+  <div class="aurora"><i class="a1"></i><i class="a2"></i><i class="a3"></i></div>
 
-  <div class="login-card">
-    <div class="brand">
-      <div class="logo-mark sm">
-        <svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="lg1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3a8"/></linearGradient></defs><path d="M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z" fill="url(#lg1)"/></svg>
+  <div class="login-stage" id="loginStage">
+    <div class="logo-float" id="logoFloat">
+      <div class="logo-halo"></div>
+      <div class="logo-orbit">
+        <div class="ring"><span class="dot"></span></div>
+        <div class="ring r2"><span class="dot"></span></div>
       </div>
-      <div>
-        <div class="brand-name">Vladuutz<span class="vlad">Panel</span></div>
-        <div class="brand-sub">LICENSE MANAGER</div>
+      <div class="sparkles"><span></span><span></span><span></span><span></span><span></span></div>
+      <div class="logo-bob">
+        <img class="logo-img" src="/assets/logo-full.png" alt="VladuutzWeb — Web Development & Solutions" draggable="false">
       </div>
+      <div class="logo-shadow"></div>
     </div>
-    <h1>Autentificare</h1>
-    <p class="hint">Intra in panou pentru a gestiona licentele.</p>
-    <form id="loginForm">
-      <div class="field">
-        <label>Utilizator</label>
-        <input type="text" id="loginUser" autocomplete="username" required>
-      </div>
-      <div class="field">
-        <label>Parola</label>
-        <input type="password" id="loginPass" autocomplete="current-password" required>
-      </div>
-      <button class="btn btn-primary" type="submit" id="loginBtn">Intra in panou</button>
-      <div class="error-box" id="loginMsg"></div>
-    </form>
+
+    <div class="login-card" id="loginCard">
+      <span class="tagline">LICENSE MANAGER</span>
+      <h1>Bine ai revenit</h1>
+      <p class="hint">Autentifica-te pentru a gestiona licentele.</p>
+      <form id="loginForm">
+        <div class="field">
+          <label for="loginUser">Utilizator</label>
+          <div class="input-wrap">
+            <svg class="i"><use href="#i-user"/></svg>
+            <input type="text" id="loginUser" autocomplete="username" placeholder="Numele tau de admin" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="loginPass">Parola</label>
+          <div class="input-wrap">
+            <svg class="i"><use href="#i-lock"/></svg>
+            <input type="password" id="loginPass" autocomplete="current-password" placeholder="••••••••" required>
+            <button class="eye" type="button" id="eyeBtn" aria-label="Arata parola"><svg class="i"><use href="#i-eye"/></svg></button>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" id="loginBtn"><span>Intra in panou</span></button>
+        <div class="error-box" id="loginMsg"></div>
+      </form>
+      <div class="login-foot">© <span id="yr"></span> VladuutzWeb · Web Development &amp; Solutions</div>
+    </div>
   </div>
 </div>
 
+<!-- ============================================================ APP -->
 <div id="appView">
   <div class="shell">
     <aside class="sidebar">
       <div class="brand">
-        <div class="logo-mark sm">
-          <svg width="20" height="20" viewBox="0 0 100 100"><defs><linearGradient id="lg2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7c5cff"/><stop offset="1" stop-color="#22d3a8"/></linearGradient></defs><path d="M58 10 L30 55 L48 55 L40 90 L72 42 L52 42 Z" fill="url(#lg2)"/></svg>
-        </div>
+        <img class="brand-logo" src="/assets/logo-icon.png" alt="VladuutzWeb">
         <div>
-          <div class="brand-name">Vladuutz<span class="vlad">Panel</span></div>
+          <div class="brand-name">Vladuutz<span class="web">Web</span></div>
           <div class="brand-sub">LICENSE MANAGER</div>
         </div>
       </div>
       <nav>
-        <div class="nav-item active" data-view="dashboard"><span class="ic">&#9670;</span> Dashboard</div>
-        <div class="nav-item" data-view="generate"><span class="ic">&#10022;</span> Genereaza cheie</div>
-        <div class="nav-item" data-view="licenses"><span class="ic">&#9636;</span> Licente</div>
+        <div class="nav-label">MENIU</div>
+        <div class="nav-item active" data-view="dashboard"><svg class="i"><use href="#i-dash"/></svg><span>Dashboard</span></div>
+        <div class="nav-item" data-view="generate"><svg class="i"><use href="#i-key"/></svg><span>Genereaza</span></div>
+        <div class="nav-item" data-view="licenses"><svg class="i"><use href="#i-list"/></svg><span>Licente</span><span class="nav-count" id="navCount">0</span></div>
       </nav>
       <div class="sidebar-foot">
-        <div class="who">Logat ca <b id="whoName">admin</b></div>
-        <button class="btn btn-ghost btn-sm" id="logoutBtn" style="width:100%">Iesi din cont</button>
+        <div class="user-card">
+          <div class="avatar" id="avatar">A</div>
+          <div class="who"><b id="whoName">admin</b><span class="online">● conectat</span></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" id="logoutBtn" style="width:100%"><svg class="i" style="width:15px;height:15px"><use href="#i-out"/></svg> Iesi din cont</button>
       </div>
     </aside>
 
     <main class="main">
+      <div class="topbar">
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <div class="sub" id="pageSub">Privire generala asupra licentelor</div>
+        </div>
+        <div class="top-actions">
+          <button class="btn btn-ghost btn-sm" id="topRefresh"><svg class="i" style="width:15px;height:15px"><use href="#i-refresh"/></svg> <span>Reincarca</span></button>
+          <button class="btn btn-ghost btn-sm only-mobile" id="logoutBtn2" aria-label="Iesire"><svg class="i" style="width:15px;height:15px"><use href="#i-out"/></svg></button>
+        </div>
+      </div>
 
+      <!-- DASHBOARD -->
       <section class="view active" id="view-dashboard">
-        <div class="topline">
-          <div><h2>Dashboard</h2><div class="sub">Privire generala asupra licentelor VladuutzPanel</div></div>
+        <div class="hero">
+          <div style="position:relative;z-index:1">
+            <h3>Salut, <span id="heroName">admin</span> 👋</h3>
+            <p>Ai <b id="heroActive" style="color:var(--fg)">0</b> licente active acum. Genereaza chei noi, prelungeste sau dezactiveaza accesul — totul se aplica in panourile clientilor in cateva zeci de secunde.</p>
+            <button class="btn btn-primary btn-auto" data-go="generate"><svg class="i" style="width:16px;height:16px"><use href="#i-plus"/></svg> Genereaza cheie noua</button>
+          </div>
+          <img class="hero-logo" src="/assets/logo-icon.png" alt="">
         </div>
+
         <div class="stat-grid">
-          <div class="stat-card"><div class="num" id="statTotal">—</div><div class="lbl">Licente totale</div></div>
-          <div class="stat-card accent"><div class="num" id="statValid">—</div><div class="lbl">Active acum</div></div>
-          <div class="stat-card warn"><div class="num" id="statExpired">—</div><div class="lbl">Expirate</div></div>
-          <div class="stat-card danger"><div class="num" id="statRevoked">—</div><div class="lbl">Dezactivate</div></div>
+          <div class="stat-card"><div class="stat-ic"><svg class="i"><use href="#i-layers"/></svg></div><div class="num" id="statTotal" data-v="0">—</div><div class="lbl">Licente totale</div></div>
+          <div class="stat-card accent"><div class="stat-ic"><svg class="i"><use href="#i-pulse"/></svg></div><div class="num" id="statValid" data-v="0">—</div><div class="lbl">Active acum</div></div>
+          <div class="stat-card warn"><div class="stat-ic"><svg class="i"><use href="#i-clock"/></svg></div><div class="num" id="statExpired" data-v="0">—</div><div class="lbl">Expirate</div></div>
+          <div class="stat-card danger"><div class="stat-ic"><svg class="i"><use href="#i-ban"/></svg></div><div class="num" id="statRevoked" data-v="0">—</div><div class="lbl">Dezactivate</div></div>
         </div>
+
+        <div class="grid-2b" style="margin-bottom:20px">
+          <div class="card">
+            <h3><svg class="i"><use href="#i-shield"/></svg> Distributie licente</h3>
+            <div class="dist-bar"><span class="d-valid" id="dValid" style="width:0"></span><span class="d-expired" id="dExpired" style="width:0"></span><span class="d-revoked" id="dRevoked" style="width:0"></span></div>
+            <div class="legend">
+              <div><i style="background:linear-gradient(90deg,#2ee6b0,#22e0f5)"></i> Active <b id="lgValid">0</b></div>
+              <div><i style="background:var(--orange)"></i> Expirate <b id="lgExpired">0</b></div>
+              <div><i style="background:var(--danger)"></i> Dezactivate <b id="lgRevoked">0</b></div>
+              <div><i style="background:var(--cyan)"></i> Permanente <b id="lgPerm">0</b></div>
+            </div>
+          </div>
+          <div class="card">
+            <h3><svg class="i"><use href="#i-clock"/></svg> Expira curand <span style="font-weight:500;color:var(--muted);font-size:12px">(14 zile)</span></h3>
+            <div id="soonList"></div>
+          </div>
+        </div>
+
         <div class="card">
-          <h3>Cele mai recente</h3>
+          <h3><svg class="i"><use href="#i-pulse"/></svg> Cele mai recente <span class="link" data-go="licenses">Vezi toate →</span></h3>
           <div id="recentList"></div>
         </div>
       </section>
 
+      <!-- GENERARE -->
       <section class="view" id="view-generate">
-        <div class="topline">
-          <div><h2>Genereaza cheie noua</h2><div class="sub">Creeaza o licenta permanenta sau temporara pentru un panou</div></div>
-        </div>
         <div class="grid-2">
           <div class="card">
-            <h3>Detalii licenta</h3>
+            <h3><svg class="i"><use href="#i-key"/></svg> Detalii licenta</h3>
             <form id="createForm">
               <div class="row2">
                 <div class="field">
@@ -317,40 +653,38 @@
                 <label>Nota (optional)</label>
                 <input type="text" id="note" placeholder="ex: Krashout">
               </div>
-              <button class="btn btn-primary" type="submit" id="createBtn">Genereaza cheia</button>
+              <button class="btn btn-primary" type="submit" id="createBtn"><svg class="i" style="width:16px;height:16px"><use href="#i-plus"/></svg><span>Genereaza cheia</span></button>
             </form>
             <div class="result-box" id="resultBox">
               <div class="rk-label">Cheie licenta</div>
               <div class="rk-value">
                 <span id="resultKey">—</span>
-                <button class="copy-btn" id="copyKeyBtn" type="button">Copiaza</button>
+                <button class="copy-btn" id="copyKeyBtn" type="button"><svg class="i" style="width:14px;height:14px"><use href="#i-copy"/></svg> Copiaza</button>
               </div>
               <div class="rk-meta" id="resultMeta"></div>
             </div>
           </div>
           <div class="card">
-            <h3>Cum functioneaza</h3>
-            <p style="color:var(--muted); font-size:13px; line-height:1.7; margin:0">
-              Generezi o <b style="color:var(--fg)">cheie</b> si o introduci in panoul tau
-              (Krashout sau alt panou) la prima intrare pe site.<br><br>
-              <b style="color:var(--fg)">Temporara</b> = expira automat dupa N zile.
-              <b style="color:var(--fg)">Permanenta</b> = nu expira niciodata.<br>
-              Din tabel poti oricand <b style="color:var(--fg)">dezactiva / activa</b>, prelungi,
-              schimba domeniul sau sterge. Panoul verifica serverul la cateva zeci de secunde,
-              deci orice schimbare se vede singura in panou.
-            </p>
+            <h3><svg class="i"><use href="#i-alert"/></svg> Cum functioneaza</h3>
+            <ol class="steps">
+              <li><span class="n">1</span><div>Generezi o <b>cheie</b> si o introduci in panoul clientului (Krashout sau alt panou) la prima intrare pe site.</div></li>
+              <li><span class="n">2</span><div><b>Temporara</b> = expira automat dupa N zile. <b>Permanenta</b> = nu expira niciodata.</div></li>
+              <li><span class="n">3</span><div>Din tabel poti oricand <b>dezactiva / activa</b>, prelungi, schimba domeniul sau sterge.</div></li>
+              <li><span class="n">4</span><div>Panoul verifica serverul la cateva zeci de secunde, deci orice schimbare se vede singura.</div></li>
+            </ol>
           </div>
         </div>
       </section>
 
+      <!-- LICENTE -->
       <section class="view" id="view-licenses">
-        <div class="topline">
-          <div><h2>Toate licentele</h2><div class="sub">Activeaza, dezactiveaza, prelungeste sau sterge licentele</div></div>
-        </div>
         <div class="card">
           <div class="table-toolbar">
-            <input type="text" class="search-input" id="searchInput" placeholder="Cauta dupa cheie, domeniu sau nota...">
-            <button class="btn btn-ghost btn-sm" id="refreshBtn">&#8635; Reincarca</button>
+            <div class="search-wrap">
+              <svg class="i"><use href="#i-search"/></svg>
+              <input type="text" class="search-input" id="searchInput" placeholder="Cauta dupa cheie, domeniu sau nota...">
+            </div>
+            <div class="chips" id="chips"></div>
           </div>
           <div id="tableWrap"></div>
         </div>
@@ -362,10 +696,10 @@
 
 <div id="toastWrap"></div>
 
-<div id="editWrap" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;z-index:1001;padding:20px;backdrop-filter:blur(2px)">
-  <div class="modal" style="max-width:420px">
+<div class="overlay" id="editWrap">
+  <div class="modal" style="max-width:430px">
     <h4>Editeaza licenta</h4>
-    <p id="editKey" class="mono" style="margin-bottom:14px"></p>
+    <p id="editKey" class="mono" style="margin-bottom:16px;color:var(--cyan)"></p>
     <div class="field">
       <label>Valabilitate</label>
       <select id="editType">
@@ -385,7 +719,7 @@
   </div>
 </div>
 
-<div id="modalWrap">
+<div class="overlay" id="modalWrap">
   <div class="modal">
     <h4 id="modalTitle">Esti sigur?</h4>
     <p id="modalText"></p>
@@ -397,90 +731,101 @@
 </div>
 
 <script>
-/* ===================== PARTICLE BACKGROUND ===================== */
+/* ===================== PARTICLE BACKGROUND (login) ===================== */
 (function () {
   const canvas = document.getElementById('particleCanvas');
   const ctx = canvas.getContext('2d');
-  let w, h, particles;
-  const COUNT = 70;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  let w, h, particles, running = true;
   const LINK_DIST = 130;
   const mouse = { x: null, y: null };
+  const COLORS = ['34,224,245', '31,143,230', '255,138,31'];
 
   function resize() {
-    w = canvas.width = canvas.offsetWidth * devicePixelRatio;
-    h = canvas.height = canvas.offsetHeight * devicePixelRatio;
-  }
-
-  function makeParticles() {
-    particles = Array.from({ length: COUNT }, () => ({
-      x: Math.random() * w,
-      y: Math.random() * h,
-      vx: (Math.random() - 0.5) * 0.35 * devicePixelRatio,
-      vy: (Math.random() - 0.5) * 0.35 * devicePixelRatio,
-      r: (Math.random() * 1.4 + 0.6) * devicePixelRatio,
+    w = canvas.width = window.innerWidth * dpr;
+    h = canvas.height = window.innerHeight * dpr;
+    const count = Math.round(Math.min(90, Math.max(35, window.innerWidth / 18)));
+    particles = Array.from({ length: count }, () => ({
+      x: Math.random() * w, y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.4 * dpr, vy: (Math.random() - 0.5) * 0.4 * dpr,
+      r: (Math.random() * 1.5 + 0.6) * dpr,
+      c: COLORS[Math.random() < 0.7 ? 0 : Math.random() < 0.6 ? 1 : 2],
     }));
   }
 
   function step() {
+    if (!running) return;
     ctx.clearRect(0, 0, w, h);
-
+    const maxD = LINK_DIST * dpr;
     for (const p of particles) {
-      p.x += p.vx;
-      p.y += p.vy;
+      p.x += p.vx; p.y += p.vy;
       if (p.x < 0 || p.x > w) p.vx *= -1;
       if (p.y < 0 || p.y > h) p.vy *= -1;
-
       if (mouse.x !== null) {
         const dx = p.x - mouse.x, dy = p.y - mouse.y;
-        const d = Math.hypot(dx, dy);
-        if (d < 160 * devicePixelRatio) {
-          const f = (1 - d / (160 * devicePixelRatio)) * 0.6;
-          p.vx += (dx / d) * f * 0.06;
-          p.vy += (dy / d) * f * 0.06;
+        const d = Math.hypot(dx, dy) || 1;
+        if (d < 170 * dpr) {
+          const f = (1 - d / (170 * dpr)) * 0.6;
+          p.vx += (dx / d) * f * 0.06; p.vy += (dy / d) * f * 0.06;
         }
       }
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(180,170,255,0.55)';
-      ctx.fill();
+      const sp = Math.hypot(p.vx, p.vy), max = 0.9 * dpr;
+      if (sp > max) { p.vx *= max / sp; p.vy *= max / sp; }
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${p.c},0.7)`; ctx.fill();
     }
-
     for (let i = 0; i < particles.length; i++) {
       for (let j = i + 1; j < particles.length; j++) {
         const a = particles[i], b = particles[j];
         const d = Math.hypot(a.x - b.x, a.y - b.y);
-        const maxD = LINK_DIST * devicePixelRatio;
         if (d < maxD) {
-          ctx.beginPath();
-          ctx.moveTo(a.x, a.y);
-          ctx.lineTo(b.x, b.y);
-          ctx.strokeStyle = `rgba(124,92,255,${0.16 * (1 - d / maxD)})`;
-          ctx.lineWidth = 1;
-          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+          ctx.strokeStyle = `rgba(${a.c},${0.17 * (1 - d / maxD)})`;
+          ctx.lineWidth = dpr * 0.8; ctx.stroke();
         }
       }
     }
-
     requestAnimationFrame(step);
   }
 
-  window.addEventListener('resize', () => { resize(); });
-  canvas.addEventListener('mousemove', (e) => {
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = (e.clientX - rect.left) * devicePixelRatio;
-    mouse.y = (e.clientY - rect.top) * devicePixelRatio;
-  });
-  canvas.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+  window.addEventListener('resize', resize);
+  window.addEventListener('mousemove', (e) => { mouse.x = e.clientX * dpr; mouse.y = e.clientY * dpr; });
+  window.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
+  window.__stopParticles = () => { running = false; };
+  window.__startParticles = () => { if (!running) { running = true; step(); } };
+  resize(); step();
+})();
 
-  resize();
-  makeParticles();
-  step();
+/* ===================== LOGO PARALLAX (plutire 3D la mouse) ===================== */
+(function () {
+  const logo = document.getElementById('logoFloat');
+  const card = document.getElementById('loginCard');
+  if (!logo || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  function move(cx, cy) {
+    const nx = (cx / window.innerWidth - 0.5) * 2;   // -1..1
+    const ny = (cy / window.innerHeight - 0.5) * 2;
+    logo.style.setProperty('--px', (nx * 16).toFixed(1) + 'px');
+    logo.style.setProperty('--py', (ny * 10).toFixed(1) + 'px');
+    logo.style.setProperty('--ry', (nx * 9).toFixed(1) + 'deg');
+    logo.style.setProperty('--rx', (-ny * 7).toFixed(1) + 'deg');
+    card.style.transform = `translate3d(${(-nx * 5).toFixed(1)}px, ${(-ny * 3).toFixed(1)}px, 0)`;
+  }
+  window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+  window.addEventListener('deviceorientation', (e) => {
+    if (e.gamma == null) return;
+    move(window.innerWidth * (0.5 + Math.max(-30, Math.min(30, e.gamma)) / 60), window.innerHeight * (0.5 + Math.max(-30, Math.min(30, (e.beta || 45) - 45)) / 60));
+  });
+  card.style.transition = 'transform .25s ease-out';
 })();
 
 /* ===================== APP LOGIC ===================== */
 const $ = (id) => document.getElementById(id);
+const ico = (n, s) => `<svg class="i"${s ? ` style="width:${s}px;height:${s}px"` : ''}><use href="#i-${n}"/></svg>`;
 let allLicenses = [];
+let statusFilter = 'all';
+$('yr').textContent = new Date().getFullYear();
+
+function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch { return null; } }
 
 async function api(path, opts = {}) {
   const res = await fetch(path, {
@@ -498,9 +843,10 @@ async function api(path, opts = {}) {
 function toast(msg, isErr = false) {
   const el = document.createElement('div');
   el.className = 'toast' + (isErr ? ' err' : '');
-  el.textContent = msg;
+  el.innerHTML = ico(isErr ? 'alert' : 'check', 18);
+  const t = document.createElement('span'); t.textContent = msg; el.appendChild(t);
   $('toastWrap').appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 3400);
 }
 
 function confirmModal(title, text) {
@@ -513,53 +859,92 @@ function confirmModal(title, text) {
     $('modalCancel').onclick = () => cleanup(false);
   });
 }
+['modalWrap', 'editWrap'].forEach((id) => $(id).addEventListener('mousedown', (e) => {
+  if (e.target.id === id) { if (id === 'modalWrap') $('modalCancel').click(); else $('editCancel').click(); }
+}));
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return;
+  if ($('modalWrap').style.display === 'flex') $('modalCancel').click();
+  else if ($('editWrap').style.display === 'flex') $('editCancel').click();
+});
+
+function setWho(name) {
+  const n = name || 'admin';
+  $('whoName').textContent = n;
+  $('heroName').textContent = n;
+  $('avatar').textContent = n.trim().charAt(0) || 'A';
+}
 
 async function checkSession() {
   const { data } = await api('/api/admin/session');
-  if (data.authenticated) showApp(); else showLogin();
+  if (data.authenticated) { setWho(store('vw_user')); showApp(); } else showLogin();
 }
 function showApp() {
   $('loginView').style.display = 'none';
   $('appView').style.display = 'block';
+  window.__stopParticles && window.__stopParticles();
+  window.scrollTo(0, 0);
   loadAll();
 }
 function showLogin() {
   $('appView').style.display = 'none';
   $('loginView').style.display = 'flex';
+  window.__startParticles && window.__startParticles();
 }
+
+$('eyeBtn').addEventListener('click', () => {
+  const p = $('loginPass'), show = p.type === 'password';
+  p.type = show ? 'text' : 'password';
+  $('eyeBtn').innerHTML = ico(show ? 'eye-off' : 'eye');
+});
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const msg = $('loginMsg');
-  msg.style.display = 'none';
-  $('loginBtn').textContent = 'Se verifica...';
+  msg.style.display = 'none'; msg.classList.remove('shake');
+  $('loginBtn').disabled = true;
+  $('loginBtn').querySelector('span').textContent = 'Se verifica...';
   const { ok, data } = await api('/api/admin/login', {
     method: 'POST',
     body: { username: $('loginUser').value, password: $('loginPass').value },
   });
-  $('loginBtn').textContent = 'Intra in panou';
+  $('loginBtn').disabled = false;
+  $('loginBtn').querySelector('span').textContent = 'Intra in panou';
   if (ok && data.ok) {
-    $('whoName').textContent = $('loginUser').value;
+    store('vw_user', $('loginUser').value);
+    setWho($('loginUser').value);
+    $('loginPass').value = '';
     showApp();
   } else {
     msg.textContent = 'Utilizator sau parola gresita.';
     msg.style.display = 'block';
+    void msg.offsetWidth; msg.classList.add('shake');
   }
 });
 
-$('logoutBtn').addEventListener('click', async () => {
+async function doLogout() {
   await api('/api/admin/logout', { method: 'POST' });
   showLogin();
-});
+}
+$('logoutBtn').addEventListener('click', doLogout);
+$('logoutBtn2').addEventListener('click', doLogout);
 
-document.querySelectorAll('.nav-item').forEach((item) => {
-  item.addEventListener('click', () => {
-    document.querySelectorAll('.nav-item').forEach((i) => i.classList.remove('active'));
-    document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
-    item.classList.add('active');
-    $('view-' + item.dataset.view).classList.add('active');
-  });
-});
+/* ---------- navigare ---------- */
+const TITLES = {
+  dashboard: ['Dashboard', 'Privire generala asupra licentelor'],
+  generate: ['Genereaza cheie noua', 'Creeaza o licenta permanenta sau temporara pentru un panou'],
+  licenses: ['Toate licentele', 'Activeaza, dezactiveaza, prelungeste sau sterge licentele'],
+};
+function go(view) {
+  document.querySelectorAll('.nav-item').forEach((i) => i.classList.toggle('active', i.dataset.view === view));
+  document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
+  $('view-' + view).classList.add('active');
+  $('pageTitle').textContent = TITLES[view][0];
+  $('pageSub').textContent = TITLES[view][1];
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.querySelectorAll('.nav-item').forEach((item) => item.addEventListener('click', () => go(item.dataset.view)));
+document.addEventListener('click', (e) => { const t = e.target.closest('[data-go]'); if (t) go(t.dataset.go); });
 
 function errText(data, status) {
   const map = {
@@ -578,7 +963,9 @@ $('licType').addEventListener('change', () => {
 $('createForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const permanent = $('licType').value === 'perm';
-  $('createBtn').textContent = 'Se genereaza...';
+  const lbl = $('createBtn').querySelector('span');
+  lbl.textContent = 'Se genereaza...';
+  $('createBtn').disabled = true;
   $('resultBox').style.display = 'none';
 
   const { ok, status, data } = await api('/api/admin/panel-create', {
@@ -591,7 +978,8 @@ $('createForm').addEventListener('submit', async (e) => {
     },
   });
 
-  $('createBtn').textContent = 'Genereaza cheia';
+  lbl.textContent = 'Genereaza cheia';
+  $('createBtn').disabled = false;
 
   if (ok && data.ok) {
     $('resultKey').textContent = data.key;
@@ -607,17 +995,32 @@ $('createForm').addEventListener('submit', async (e) => {
   }
 });
 
-$('copyKeyBtn').addEventListener('click', () => {
-  navigator.clipboard.writeText($('resultKey').textContent).then(() => toast('Cheie copiata.'));
-});
+function copy(text) {
+  const done = () => toast('Cheie copiata.');
+  if (navigator.clipboard && navigator.clipboard.writeText) return navigator.clipboard.writeText(text).then(done, fallback);
+  fallback();
+  function fallback() {
+    const t = document.createElement('textarea'); t.value = text; document.body.appendChild(t); t.select();
+    try { document.execCommand('copy'); done(); } catch { toast('Nu am putut copia.', true); }
+    t.remove();
+  }
+}
+$('copyKeyBtn').addEventListener('click', () => copy($('resultKey').textContent));
 
-async function loadAll() {
+async function loadAll(manual) {
+  if (!allLicenses.length) $('tableWrap').innerHTML = '<div class="skeleton"></div><div class="skeleton" style="width:80%"></div><div class="skeleton" style="width:90%"></div>';
   const { ok, data } = await api('/api/admin/panel-list');
-  if (!ok || !data.ok) { toast('Nu am putut incarca licentele: ' + errText(data, 0), true); return; }
+  if (!ok || !data.ok) {
+    if (data && data.reason === 'unauthorized') { showLogin(); }
+    toast('Nu am putut incarca licentele: ' + errText(data, 0), true);
+    return;
+  }
   allLicenses = data.licenses || [];
-  renderStats();
-  renderRecent();
-  renderTable($('searchInput').value);
+  renderAll();
+  if (manual) toast('Lista a fost reincarcata.');
+}
+function renderAll() {
+  renderStats(); renderDist(); renderSoon(); renderRecent(); renderChips(); renderTable($('searchInput').value);
 }
 
 function statusOf(lic) {
@@ -626,18 +1029,45 @@ function statusOf(lic) {
   return 'valid';
 }
 
+function countUp(el, to) {
+  const from = Number(el.dataset.v) || 0;
+  el.dataset.v = to;
+  if (from === to || matchMedia('(prefers-reduced-motion: reduce)').matches) { el.textContent = to; return; }
+  const t0 = performance.now(), dur = 700;
+  (function tick(now) {
+    const p = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - p, 3);
+    el.textContent = Math.round(from + (to - from) * e);
+    if (p < 1) requestAnimationFrame(tick);
+  })(t0);
+}
+
 function renderStats() {
   const count = (st) => allLicenses.filter((l) => statusOf(l) === st).length;
-  $('statTotal').textContent = allLicenses.length;
-  $('statValid').textContent = count('valid');
-  $('statExpired').textContent = count('expired');
-  $('statRevoked').textContent = count('revoked');
+  countUp($('statTotal'), allLicenses.length);
+  countUp($('statValid'), count('valid'));
+  countUp($('statExpired'), count('expired'));
+  countUp($('statRevoked'), count('revoked'));
+  $('heroActive').textContent = count('valid');
+  $('navCount').textContent = allLicenses.length;
 }
+
+function renderDist() {
+  const total = allLicenses.length || 1;
+  const c = (st) => allLicenses.filter((l) => statusOf(l) === st).length;
+  const v = c('valid'), x = c('expired'), r = c('revoked');
+  $('dValid').style.width = (v / total * 100) + '%';
+  $('dExpired').style.width = (x / total * 100) + '%';
+  $('dRevoked').style.width = (r / total * 100) + '%';
+  $('lgValid').textContent = v; $('lgExpired').textContent = x; $('lgRevoked').textContent = r;
+  $('lgPerm').textContent = allLicenses.filter((l) => !l.expires && !l.revoked).length;
+}
+
+function daysLeft(l) { return Math.ceil((l.expires - Date.now()) / 86400000); }
 
 function expiryLabel(l) {
   if (!l.expires) return 'Permanenta';
   const d = new Date(l.expires).toLocaleDateString('ro-RO');
-  const left = Math.ceil((l.expires - Date.now()) / 86400000);
+  const left = daysLeft(l);
   return left > 0 ? `${d} (${left} zile)` : `${d} (expirata)`;
 }
 
@@ -650,17 +1080,31 @@ function seenLabel(l) {
   return new Date(l.lastSeen).toLocaleDateString('ro-RO');
 }
 
+function renderSoon() {
+  const soon = allLicenses
+    .filter((l) => !l.revoked && l.expires && l.expires > Date.now() && daysLeft(l) <= 14)
+    .sort((a, b) => a.expires - b.expires).slice(0, 4);
+  const wrap = $('soonList');
+  if (!soon.length) {
+    wrap.innerHTML = `<div class="empty-state" style="padding:14px 0 6px"><div class="big" style="width:46px;height:46px;border-radius:15px">${ico('shield')}</div>Nicio licenta nu expira in curand.</div>`;
+    return;
+  }
+  wrap.innerHTML = soon.map((l) => `<div class="li">
+      <div><div class="k mono">${escapeHtml(l.key)}</div><div class="m">${escapeHtml(l.domain || 'domeniu nelegat inca')}</div></div>
+      <span class="badge expired">${daysLeft(l)} zile</span></div>`).join('');
+}
+
 function renderRecent() {
   const recent = [...allLicenses].sort((a, b) => (b.updated || 0) - (a.updated || 0)).slice(0, 5);
   const wrap = $('recentList');
   if (!recent.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="big">—</div>Nicio licenta inca. Genereaza prima din meniu.</div>';
+    wrap.innerHTML = `<div class="empty-state"><div class="big">${ico('key')}</div>Nicio licenta inca. Genereaza prima din meniu.</div>`;
     return;
   }
-  wrap.innerHTML = recent.map((l) => `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04)">
+  wrap.innerHTML = recent.map((l) => `<div class="li">
       <div>
-        <div style="font-weight:600;font-size:13.5px" class="mono">${escapeHtml(l.key)}</div>
-        <div style="color:var(--muted);font-size:12px;margin-top:2px">${escapeHtml(l.domain || 'domeniu nelegat inca')} · ${expiryLabel(l)}</div>
+        <div class="k mono">${escapeHtml(l.key)}</div>
+        <div class="m">${escapeHtml(l.domain || 'domeniu nelegat inca')} · ${expiryLabel(l)}</div>
       </div>
       ${badge(statusOf(l))}
     </div>`).join('');
@@ -676,47 +1120,62 @@ function escapeHtml(s) {
   return String(s || '').replace(/[&<>"']/g, (c) => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
 }
 
+function renderChips() {
+  const c = (st) => st === 'all' ? allLicenses.length : allLicenses.filter((l) => statusOf(l) === st).length;
+  const defs = [['all', 'Toate'], ['valid', 'Active'], ['expired', 'Expirate'], ['revoked', 'Dezactivate']];
+  $('chips').innerHTML = defs.map(([k, n]) => `<button class="chip${statusFilter === k ? ' on' : ''}" data-f="${k}">${n} <em>${c(k)}</em></button>`).join('');
+  $('chips').querySelectorAll('.chip').forEach((b) => b.addEventListener('click', () => {
+    statusFilter = b.dataset.f; renderChips(); renderTable($('searchInput').value);
+  }));
+}
+
 function renderTable(filter = '') {
   const wrap = $('tableWrap');
   const f = filter.trim().toLowerCase();
   const rows = allLicenses
+    .filter((l) => statusFilter === 'all' || statusOf(l) === statusFilter)
     .filter((l) => !f || (l.key || '').toLowerCase().includes(f) || (l.domain || '').toLowerCase().includes(f) || (l.note || '').toLowerCase().includes(f))
     .sort((a, b) => (b.updated || 0) - (a.updated || 0));
 
   if (!rows.length) {
-    wrap.innerHTML = '<div class="empty-state"><div class="big">&#9636;</div>Nicio licenta gasita.</div>';
+    wrap.innerHTML = `<div class="empty-state"><div class="big">${ico('list')}</div>Nicio licenta gasita.</div>`;
     return;
   }
 
   wrap.innerHTML = `
-    <div style="overflow-x:auto"><table>
-      <thead><tr><th>Cheie</th><th>Domeniu</th><th>Expira</th><th>Status</th><th>Ultima verificare</th><th>Nota</th><th></th></tr></thead>
+    <table>
+      <thead><tr><th>Cheie</th><th>Domeniu</th><th>Expira</th><th>Status</th><th>Ultima verificare</th><th></th></tr></thead>
       <tbody>
         ${rows.map((l) => {
           const k = escapeHtml(l.key);
+          let exp;
+          if (!l.expires) exp = `<span class="perm-tag">${ico('infinity', 15)} Permanenta</span>`;
+          else {
+            const left = daysLeft(l), d = new Date(l.expires).toLocaleDateString('ro-RO');
+            exp = `${d}<small class="${left <= 0 ? 'over' : left <= 7 ? 'low' : ''}">${left > 0 ? left + ' zile ramase' : 'expirata'}</small>`;
+          }
           return `<tr>
-            <td class="key-cell mono">${k} <button class="icon-btn" data-copy="${k}" title="Copiaza">&#10697;</button></td>
-            <td class="domain-cell">${escapeHtml(l.domain || '—')}</td>
-            <td class="mono">${expiryLabel(l)}</td>
-            <td>${badge(statusOf(l))}</td>
-            <td class="mono">${seenLabel(l)}</td>
-            <td style="color:var(--muted)">${escapeHtml(l.note || '')}</td>
-            <td class="actions-cell" style="white-space:nowrap">
+            <td class="key-cell" data-label="Cheie"><span class="kv mono">${k}<button class="icon-btn sm" data-copy="${k}" title="Copiaza">${ico('copy')}</button></span></td>
+            <td class="domain-cell" data-label="Domeniu"><div>${escapeHtml(l.domain || '—')}${l.note ? `<small>${escapeHtml(l.note)}</small>` : ''}</div></td>
+            <td class="exp" data-label="Expira"><div>${exp}</div></td>
+            <td data-label="Status">${badge(statusOf(l))}</td>
+            <td class="mono" data-label="Ultima verificare" style="color:var(--muted)">${seenLabel(l)}</td>
+            <td class="actions-cell"><span class="wrap">
               ${l.revoked
-                ? `<button class="icon-btn" data-activate="${k}" title="Activeaza">&#9654;</button>`
-                : `<button class="icon-btn danger" data-deactivate="${k}" title="Dezactiveaza">&#9208;</button>`}
-              <button class="icon-btn" data-edit="${k}" title="Editeaza / prelungeste">&#9998;</button>
-              <button class="icon-btn danger" data-delete="${k}" title="Sterge definitiv">&#10005;</button>
-            </td>
+                ? `<button class="icon-btn go" data-activate="${k}" title="Activeaza">${ico('play')}</button>`
+                : `<button class="icon-btn danger" data-deactivate="${k}" title="Dezactiveaza">${ico('pause')}</button>`}
+              <button class="icon-btn" data-edit="${k}" title="Editeaza / prelungeste">${ico('edit')}</button>
+              <button class="icon-btn danger" data-delete="${k}" title="Sterge definitiv">${ico('trash')}</button>
+            </span></td>
           </tr>`;
         }).join('')}
       </tbody>
-    </table></div>
+    </table>
   `;
 
   const bind = (sel, fn) => wrap.querySelectorAll(sel).forEach((btn) => btn.addEventListener('click', () => fn(btn)));
 
-  bind('[data-copy]', (btn) => navigator.clipboard.writeText(btn.dataset.copy).then(() => toast('Cheie copiata.')));
+  bind('[data-copy]', (btn) => copy(btn.dataset.copy));
 
   bind('[data-deactivate]', async (btn) => {
     const key = btn.dataset.deactivate;
@@ -772,7 +1231,7 @@ $('editSave').addEventListener('click', async () => {
 });
 
 $('searchInput').addEventListener('input', (e) => renderTable(e.target.value));
-$('refreshBtn').addEventListener('click', () => loadAll());
+$('topRefresh').addEventListener('click', () => loadAll(true));
 
 checkSession();
 </script>
