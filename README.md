@@ -16,13 +16,30 @@ date gratuita (Vercel KV, bazata pe Redis). Panoul PHP intreaba periodic
 2. Daca folosesti GitHub: mergi pe vercel.com -> "Add New Project" ->
    importa repo-ul.
 
-## 2. Adauga baza de date KV
+## 2. Adauga baza de date (Upstash Redis, prin Marketplace)
 
-1. In dashboard-ul Vercel, intra in proiect -> tab **Storage** -> **Create
-   Database** -> alege **KV** (Upstash Redis, free tier).
-2. Conecteaza-o la proiect ("Connect to Project"). Vercel adauga automat
-   variabilele de mediu necesare (`KV_REST_API_URL`, `KV_REST_API_TOKEN`
-   etc.) - nu trebuie sa le copiezi tu manual.
+Vercel KV (vechiul produs) nu mai exista ca atare - a fost inlocuit cu
+integrarea **Upstash Redis** din Marketplace. E tot un key-value store
+gratuit, doar ca se adauga altfel:
+
+**Varianta din dashboard:**
+1. In proiectul tau pe vercel.com -> tab **Storage** -> **Browse Marketplace**
+   (sau **Create Database**).
+2. Cauta **Upstash** -> alege **Upstash Redis** -> plan **Free**.
+3. Apasa **Connect to Project** si selecteaza proiectul `license-vercel`
+   si mediile (Production + Development).
+4. Vercel adauga automat variabilele `KV_REST_API_URL` si
+   `KV_REST_API_TOKEN` in Environment Variables - nu le copiezi tu manual.
+
+**Varianta din CLI** (daca ai `vercel` instalat si ai facut `vercel link`
+in folderul proiectului):
+```bash
+vercel integration add upstash
+```
+si urmezi promptul ca sa creezi/conectezi baza de date.
+
+5. Dupa ce ai conectat-o, fa un redeploy (Deployments -> ... -> Redeploy)
+   ca proiectul sa preia noile variabile de mediu.
 
 ## 3. Seteaza parola de admin
 
