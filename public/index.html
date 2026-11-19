@@ -93,34 +93,28 @@
 
   /* ---- logo plutitor ---- */
   .logo-float {
-    position: relative; width: clamp(230px, 62vw, 310px); margin-bottom: 6px;
-    transform: translate3d(var(--px, 0px), var(--py, 0px), 0) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
-    transition: transform .25s ease-out;
+    position: relative; width: clamp(150px, 42vw, 190px); margin-bottom: 10px;
+    will-change: transform;
   }
-  .logo-bob { position: relative; animation: bob 5.2s ease-in-out infinite; }
+  .logo-bob { position: relative; animation: bob 7s cubic-bezier(.45,0,.55,1) infinite; will-change: transform; }
   @keyframes bob {
-    0%, 100% { transform: translateY(0) rotate(-1.2deg); }
-    50%      { transform: translateY(-18px) rotate(1.2deg); }
+    0%, 100% { transform: translate3d(0, 0, 0); }
+    50%      { transform: translate3d(0, -10px, 0); }
   }
   .logo-img {
     display: block; width: 100%; height: auto; position: relative; z-index: 2;
-    filter: drop-shadow(0 10px 30px rgba(34,224,245,.35)) drop-shadow(0 0 60px rgba(31,143,230,.25));
-    animation: glowpulse 4s ease-in-out infinite;
+    filter: drop-shadow(0 8px 22px rgba(34,224,245,.32));
     user-select: none; -webkit-user-drag: none;
-  }
-  @keyframes glowpulse {
-    0%, 100% { filter: drop-shadow(0 10px 26px rgba(34,224,245,.28)) drop-shadow(0 0 50px rgba(31,143,230,.2)); }
-    50%      { filter: drop-shadow(0 14px 38px rgba(255,138,31,.38)) drop-shadow(0 0 80px rgba(34,224,245,.38)); }
   }
   .logo-halo {
     position: absolute; z-index: 1; left: 50%; top: 38%; width: 120%; aspect-ratio: 1;
     transform: translate(-50%, -50%);
     background: radial-gradient(circle, rgba(34,224,245,.22), rgba(31,143,230,.1) 40%, transparent 68%);
-    border-radius: 50%; animation: halo 4s ease-in-out infinite;
+    border-radius: 50%; animation: halo 7s cubic-bezier(.45,0,.55,1) infinite;
   }
   @keyframes halo { 0%, 100% { opacity: .65; transform: translate(-50%, -50%) scale(.95); } 50% { opacity: 1; transform: translate(-50%, -50%) scale(1.08); } }
-  .logo-orbit { position: absolute; z-index: 3; left: 50%; top: 38%; width: 118%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
-  .logo-orbit .ring { position: absolute; inset: 0; animation: spin 16s linear infinite; }
+  .logo-orbit { position: absolute; z-index: 3; left: 50%; top: 38%; width: 135%; aspect-ratio: 1; transform: translate(-50%, -50%); pointer-events: none; }
+  .logo-orbit .ring { position: absolute; inset: 0; animation: spin 22s linear infinite; }
   .logo-orbit .ring.r2 { inset: 9%; animation-duration: 24s; animation-direction: reverse; }
   .logo-orbit .ring::before {
     content: ''; position: absolute; inset: 0; border-radius: 50%;
@@ -130,11 +124,11 @@
   .logo-orbit .ring.r2 .dot { background: var(--orange); box-shadow: 0 0 12px 3px rgba(255,138,31,.8); width: 6px; height: 6px; top: auto; bottom: 0; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .logo-shadow {
-    width: 56%; height: 14px; margin: 10px auto 0; border-radius: 50%;
+    width: 60%; height: 10px; margin: 8px auto 0; border-radius: 50%;
     background: radial-gradient(ellipse, rgba(34,224,245,.38), transparent 70%);
-    filter: blur(5px); animation: shadowpulse 5.2s ease-in-out infinite;
+    animation: shadowpulse 7s cubic-bezier(.45,0,.55,1) infinite;
   }
-  @keyframes shadowpulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(.62); opacity: .4; } }
+  @keyframes shadowpulse { 0%, 100% { transform: scale(1); opacity: .9; } 50% { transform: scale(.7); opacity: .45; } }
   .sparkles span {
     position: absolute; z-index: 3; width: 4px; height: 4px; border-radius: 50%; background: #fff;
     box-shadow: 0 0 10px 2px rgba(120,220,255,.9); opacity: 0; animation: twinkle 3.6s ease-in-out infinite;
@@ -212,7 +206,7 @@
     background: rgba(255,93,108,.09); border: 1px solid rgba(255,93,108,.25);
     border-radius: 10px; padding: 10px 12px; display: none;
   }
-  .error-box.shake { animation: shake .4s; }
+  .login-card.shake { animation: shake .45s; }
   @keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
   .login-foot { margin-top: 18px; font-size: 11.5px; color: #4f5d72; text-align: center; letter-spacing: .02em; }
 
@@ -403,17 +397,34 @@
   @keyframes shimmer { to { background-position: -200% 0; } }
 
   /* toast */
-  #toastWrap { position: fixed; bottom: 24px; right: 24px; display: flex; flex-direction: column; gap: 10px; z-index: 2000; }
+  #toastWrap { position: fixed; top: calc(20px + env(safe-area-inset-top, 0px)); right: 20px; display: flex; flex-direction: column; gap: 12px; z-index: 3000; width: 360px; max-width: calc(100vw - 32px); pointer-events: none; }
   .toast {
-    display: flex; align-items: center; gap: 11px;
-    background: rgba(14,20,32,.96); backdrop-filter: blur(14px); border: 1px solid var(--border-strong);
-    border-radius: 14px; padding: 13px 16px; font-size: 13px; box-shadow: 0 14px 40px rgba(0,0,0,.5);
-    animation: slidein .3s cubic-bezier(.2,.8,.2,1); min-width: 240px; max-width: 360px;
+    --tc: var(--ok);
+    position: relative; overflow: hidden; pointer-events: auto;
+    display: flex; align-items: flex-start; gap: 13px;
+    background: linear-gradient(135deg, rgba(18,26,41,.96), rgba(11,17,28,.96));
+    backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-strong); border-left: 3px solid var(--tc);
+    border-radius: 16px; padding: 14px 14px 16px 14px;
+    box-shadow: 0 18px 50px rgba(0,0,0,.55), 0 0 36px -10px var(--tc);
+    animation: toastin .45s cubic-bezier(.2,.9,.25,1.1) both;
   }
-  .toast .i { color: var(--ok); }
-  .toast.err .i { color: var(--danger); }
-  .toast.out { opacity: 0; transform: translateX(20px); transition: all .25s; }
-  @keyframes slidein { from { transform: translateX(30px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .toast.err { --tc: var(--danger); }
+  .toast.info { --tc: var(--cyan); }
+  .toast .t-ic { width: 34px; height: 34px; border-radius: 11px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: var(--tc); background: color-mix(in srgb, var(--tc) 15%, transparent); }
+  .toast .t-ic .i { width: 18px; height: 18px; stroke-width: 2.2; }
+  .toast .t-body { flex: 1; min-width: 0; padding-top: 1px; }
+  .toast .t-title { font-family: var(--font-d); font-weight: 700; font-size: 13.5px; margin-bottom: 2px; }
+  .toast .t-msg { font-size: 12.5px; color: var(--muted); line-height: 1.45; word-break: break-word; }
+  .toast .t-x { background: none; border: none; color: var(--muted); padding: 4px; border-radius: 8px; display: flex; flex-shrink: 0; }
+  .toast .t-x:hover { color: var(--fg); background: rgba(255,255,255,.08); }
+  .toast .t-x .i { width: 14px; height: 14px; }
+  .toast .t-bar { position: absolute; left: 0; bottom: 0; height: 3px; width: 100%; background: var(--tc); transform-origin: left; animation: tbar var(--dur, 4500ms) linear forwards; opacity: .85; }
+  .toast:hover .t-bar { animation-play-state: paused; }
+  .toast.out { animation: toastout .3s cubic-bezier(.5,0,.75,0) forwards; }
+  @keyframes toastin { from { opacity: 0; transform: translateX(60px) scale(.94); } to { opacity: 1; transform: none; } }
+  @keyframes toastout { to { opacity: 0; transform: translateX(60px) scale(.94); } }
+  @keyframes tbar { to { transform: scaleX(0); } }
 
   .overlay { display: none; position: fixed; inset: 0; background: rgba(2,5,10,.66); align-items: center; justify-content: center; z-index: 1500; padding: 20px; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   .modal { background: linear-gradient(180deg, #121a29, #0d1420); border: 1px solid var(--border-strong); border-radius: 20px; padding: 26px; max-width: 400px; width: 100%; box-shadow: 0 30px 90px rgba(0,0,0,.65); animation: pop .25s cubic-bezier(.2,.9,.3,1.2); }
@@ -444,8 +455,7 @@
     .topbar h2 { font-size: 20px; }
     .hero { padding: 22px 20px; }
     .hero-logo { width: 96px; }
-    #toastWrap { left: 16px; right: 16px; bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
-    .toast { max-width: none; }
+    #toastWrap { left: 16px; right: 16px; width: auto; max-width: none; top: calc(14px + env(safe-area-inset-top, 0px)); }
     .row2 { grid-template-columns: 1fr; gap: 0; }
     .card { padding: 20px 18px; }
 
@@ -487,6 +497,7 @@
     <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4.5" width="4" height="15" rx="1.2"/><rect x="14" y="4.5" width="4" height="15" rx="1.2"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5M12 16.5v.01"/></symbol>
     <symbol id="i-pulse" viewBox="0 0 24 24"><path d="M3 12h4l3-8 4 16 3-8h4"/></symbol>
@@ -528,7 +539,7 @@
           <label for="loginUser">Utilizator</label>
           <div class="input-wrap">
             <svg class="i"><use href="#i-user"/></svg>
-            <input type="text" id="loginUser" autocomplete="username" placeholder="Numele tau de admin" required>
+            <input type="text" id="loginUser" autocomplete="username" placeholder="Nume" required>
           </div>
         </div>
         <div class="field">
@@ -540,7 +551,6 @@
           </div>
         </div>
         <button class="btn btn-primary" type="submit" id="loginBtn"><span>Intra in panou</span></button>
-        <div class="error-box" id="loginMsg"></div>
       </form>
       <div class="login-foot">© <span id="yr"></span> VladuutzWeb · Web Development &amp; Solutions</div>
     </div>
@@ -796,26 +806,30 @@
   resize(); step();
 })();
 
-/* ===================== LOGO PARALLAX (plutire 3D la mouse) ===================== */
+/* ===================== LOGO PARALLAX (smooth, cu interpolare) ===================== */
 (function () {
   const logo = document.getElementById('logoFloat');
   const card = document.getElementById('loginCard');
   if (!logo || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  function move(cx, cy) {
-    const nx = (cx / window.innerWidth - 0.5) * 2;   // -1..1
-    const ny = (cy / window.innerHeight - 0.5) * 2;
-    logo.style.setProperty('--px', (nx * 16).toFixed(1) + 'px');
-    logo.style.setProperty('--py', (ny * 10).toFixed(1) + 'px');
-    logo.style.setProperty('--ry', (nx * 9).toFixed(1) + 'deg');
-    logo.style.setProperty('--rx', (-ny * 7).toFixed(1) + 'deg');
-    card.style.transform = `translate3d(${(-nx * 5).toFixed(1)}px, ${(-ny * 3).toFixed(1)}px, 0)`;
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  function target(x, y) {
+    tx = (x / window.innerWidth - 0.5) * 2;
+    ty = (y / window.innerHeight - 0.5) * 2;
   }
-  window.addEventListener('mousemove', (e) => move(e.clientX, e.clientY));
+  window.addEventListener('mousemove', (e) => target(e.clientX, e.clientY));
   window.addEventListener('deviceorientation', (e) => {
     if (e.gamma == null) return;
-    move(window.innerWidth * (0.5 + Math.max(-30, Math.min(30, e.gamma)) / 60), window.innerHeight * (0.5 + Math.max(-30, Math.min(30, (e.beta || 45) - 45)) / 60));
+    tx = Math.max(-30, Math.min(30, e.gamma)) / 30;
+    ty = Math.max(-30, Math.min(30, (e.beta || 45) - 45)) / 30;
   });
-  card.style.transition = 'transform .25s ease-out';
+  (function loop() {
+    cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;          // easing lent = miscare fluida
+    if (document.getElementById('loginView').style.display !== 'none') {
+      logo.style.transform = `translate3d(${(cx * 12).toFixed(2)}px, ${(cy * 7).toFixed(2)}px, 0) rotateX(${(-cy * 5).toFixed(2)}deg) rotateY(${(cx * 7).toFixed(2)}deg)`;
+      card.style.transform = `translate3d(${(-cx * 4).toFixed(2)}px, ${(-cy * 2).toFixed(2)}px, 0)`;
+    }
+    requestAnimationFrame(loop);
+  })();
 })();
 
 /* ===================== APP LOGIC ===================== */
@@ -840,13 +854,27 @@ async function api(path, opts = {}) {
   return { ok: res.ok, status: res.status, data };
 }
 
-function toast(msg, isErr = false) {
+function toast(msg, kind, title) {
+  // kind: true | 'err' = eroare, 'ok' / undefined = succes, 'info'
+  const k = (kind === true || kind === 'err') ? 'err' : (kind === 'info' ? 'info' : 'ok');
+  const defTitle = { ok: 'Succes', err: 'Eroare', info: 'Info' }[k];
+  const dur = k === 'err' ? 6000 : 4200;
+  const wrap = $('toastWrap');
+  while (wrap.children.length >= 4) wrap.firstChild.remove();
   const el = document.createElement('div');
-  el.className = 'toast' + (isErr ? ' err' : '');
-  el.innerHTML = ico(isErr ? 'alert' : 'check', 18);
-  const t = document.createElement('span'); t.textContent = msg; el.appendChild(t);
-  $('toastWrap').appendChild(el);
-  setTimeout(() => { el.classList.add('out'); setTimeout(() => el.remove(), 260); }, 3400);
+  el.className = 'toast ' + k;
+  el.style.setProperty('--dur', dur + 'ms');
+  el.setAttribute('role', k === 'err' ? 'alert' : 'status');
+  el.innerHTML = `<div class="t-ic">${ico(k === 'err' ? 'alert' : k === 'info' ? 'shield' : 'check')}</div>
+    <div class="t-body"><div class="t-title"></div><div class="t-msg"></div></div>
+    <button class="t-x" aria-label="Inchide">${ico('x')}</button><div class="t-bar"></div>`;
+  el.querySelector('.t-title').textContent = title || defTitle;
+  el.querySelector('.t-msg').textContent = msg;
+  let gone = false;
+  const close = () => { if (gone) return; gone = true; el.classList.add('out'); setTimeout(() => el.remove(), 300); };
+  el.querySelector('.t-x').addEventListener('click', close);
+  el.querySelector('.t-bar').addEventListener('animationend', close);
+  wrap.appendChild(el);
 }
 
 function confirmModal(title, text) {
@@ -900,8 +928,6 @@ $('eyeBtn').addEventListener('click', () => {
 
 $('loginForm').addEventListener('submit', async (e) => {
   e.preventDefault();
-  const msg = $('loginMsg');
-  msg.style.display = 'none'; msg.classList.remove('shake');
   $('loginBtn').disabled = true;
   $('loginBtn').querySelector('span').textContent = 'Se verifica...';
   const { ok, data } = await api('/api/admin/login', {
@@ -915,10 +941,10 @@ $('loginForm').addEventListener('submit', async (e) => {
     setWho($('loginUser').value);
     $('loginPass').value = '';
     showApp();
+    toast('Bine ai revenit, ' + $('whoName').textContent + '!', 'ok', 'Autentificat');
   } else {
-    msg.textContent = 'Utilizator sau parola gresita.';
-    msg.style.display = 'block';
-    void msg.offsetWidth; msg.classList.add('shake');
+    toast('Utilizator sau parola gresita. Verifica datele si incearca din nou.', 'err', 'Autentificare esuata');
+    const c = $('loginCard'); c.classList.remove('shake'); void c.offsetWidth; c.classList.add('shake');
   }
 });
 
