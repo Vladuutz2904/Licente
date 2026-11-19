@@ -106,6 +106,11 @@
     filter: drop-shadow(0 8px 22px rgba(34,224,245,.32));
     user-select: none; -webkit-user-drag: none;
   }
+  .logo-float { container-type: inline-size; }
+  .wm { position: relative; z-index: 2; text-align: center; margin-top: -2%; }
+  .wm-name { font-family: var(--font-d); font-weight: 800; font-size: 13.2cqw; line-height: 1; letter-spacing: -.025em; color: #fff; text-shadow: 0 4px 24px rgba(34,224,245,.25); }
+  .wm-name span { background: linear-gradient(90deg, #2fd0f4, #1f9be8); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .wm-tag { font-family: var(--font-d); font-weight: 700; font-size: 3.15cqw; letter-spacing: .075em; color: #2cc0ee; margin-top: .9em; white-space: nowrap; }
   .logo-halo {
     position: absolute; z-index: 1; left: 50%; top: 38%; width: 120%; aspect-ratio: 1;
     transform: translate(-50%, -50%);
@@ -525,7 +530,8 @@
       </div>
       <div class="sparkles"><span></span><span></span><span></span><span></span><span></span></div>
       <div class="logo-bob">
-        <img class="logo-img" src="/assets/logo-full.png" alt="VladuutzWeb — Web Development & Solutions" draggable="false">
+        <img class="logo-img" src="/assets/logo-icon.png" alt="" draggable="false">
+        <div class="wm"><div class="wm-name">Vladuutz<span>Web</span></div><div class="wm-tag">WEB DEVELOPMENT &amp; SOLUTIONS</div></div>
       </div>
       <div class="logo-shadow"></div>
     </div>
