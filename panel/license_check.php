@@ -19,6 +19,10 @@ const LICENSE_CHECK_INTERVAL = 45;            // secunde intre verificari (schim
 const LICENSE_RETRY_INTERVAL = 20;            // daca serverul nu raspunde, reincearca dupa atatea secunde
 const LICENSE_GRACE_PERIOD   = 3 * 24 * 3600; // cat tolereaza panoul daca serverul de licente e cazut
 
+// Acelasi secret ca LICENSE_SIGN_SECRET din Vercel -> Environment Variables.
+// Lasa-l gol ('') daca nu ai activat semnarea pe server.
+const LICENSE_SIGN_SECRET    = '';
+
 function license_domain(): string
 {
     $h = strtolower((string) ($_SERVER['HTTP_HOST'] ?? 'unknown'));
@@ -42,6 +46,28 @@ function license_save(array $state): bool
     // prima linie (exit) blocheaza citirea fisierului din browser
     $ok = @file_put_contents(LICENSE_STORE_FILE, "<?php exit; ?>\n" . json_encode($state), LOCK_EX);
     return $ok !== false;
+}
+
+/** Verifica semnatura HMAC a raspunsului (daca LICENSE_SIGN_SECRET e setat). */
+function license_verify_sig(array $json, string $key, string $domain): bool
+{
+    if (LICENSE_SIGN_SECRET === '') return true;
+    if (!isset($json['sig']) || !is_string($json['sig']) || $json['sig'] === '') return false;
+
+    $respKey    = (string) ($json['key']    ?? $key);
+    $respDomain = (string) ($json['domain'] ?? $domain);
+    if ($respKey !== $key || $respDomain !== $domain) return false;
+
+    $expires = $json['expires'] ?? null;
+    $payload = implode('|', [
+        $respKey,
+        $respDomain,
+        !empty($json['valid']) ? '1' : '0',
+        (string) ($json['reason'] ?? ''),
+        $expires === null ? '' : (string) $expires,
+    ]);
+    $expected = hash_hmac('sha256', $payload, LICENSE_SIGN_SECRET);
+    return hash_equals($expected, $json['sig']);
 }
 
 /** Intreaba serverul. Returneaza array (raspunsul JSON) sau null daca serverul nu raspunde. */
@@ -70,6 +96,9 @@ function license_remote(string $key, string $domain): ?array
     $json = json_decode($raw, true);
     // 500 / pagini de eroare de la Vercel => tratate ca "server indisponibil"
     if (!is_array($json) || !array_key_exists('valid', $json) || ($json['reason'] ?? '') === 'server_error' || ($json['reason'] ?? '') === 'kv_not_configured') {
+        return null;
+    }
+    if (!license_verify_sig($json, $key, $domain)) {
         return null;
     }
     return $json;

@@ -91,3 +91,30 @@ Storage -> Upstash Redis -> Connect to Project, apoi **Redeploy**.
 - Schimba `ADMIN_USER` / `ADMIN_PASS` / `ADMIN_SECRET` in Environment Variables (valorile de rezerva din cod
   sunt vizibile oricui vede codul).
 - Licentele vechi (legate doar de domeniu) se migreaza automat la prima deschidere a listei si primesc cheie.
+
+## Semnare HMAC a raspunsurilor (recomandat)
+
+De la ultima actualizare, `/api/check` poate semna fiecare raspuns (HMAC-SHA256),
+ca panoul sa stie sigur ca raspunsul vine de la acest server si nu de la unul
+fals pus de client in locul lui `LICENSE_API_URL`.
+
+**Pe Vercel:**
+1. Project Settings -> Environment Variables -> adauga `LICENSE_SIGN_SECRET`
+   cu o valoare lunga si aleatoare (ex: `openssl rand -hex 32`).
+2. Redeploy proiectul (altfel variabila noua nu se vede).
+
+**In panou (`config.php`):**
+3. Pune EXACT aceeasi valoare in constanta `LICENSE_SIGN_SECRET` (langa
+   celelalte constante de licenta, aproape de `LICENSE_API_URL`).
+
+Daca lasi `LICENSE_SIGN_SECRET` gol pe oricare din cele doua parti, semnarea
+e dezactivata si totul merge ca inainte (nesemnat) - e doar un bonus de
+siguranta, nu o conditie obligatorie.
+
+**Important:** acest secret apara impotriva unui server fals pus in locul
+celui adevarat. NU apara impotriva cuiva care are acces la fisierele
+panoului si editeaza direct codul PHP (poate citi secretul din propriul
+`config.php`). Pentru asta nu exista protectie completa in PHP simplu -
+singura metoda reala e un encoder platit (ionCube / SourceGuardian) care
+cripteaza fisierele PHP, livrate ca bytecode ce necesita o extensie
+instalata pe server ca sa ruleze.
