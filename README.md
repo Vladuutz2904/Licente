@@ -47,12 +47,44 @@ In proiect -> **Settings** -> **Environment Variables**, adauga:
 
 ```
 ADMIN_SECRET = o-parola-lunga-si-random-pe-care-nu-o-stie-nimeni
+ADMIN_USER   = Vladuutz
+ADMIN_PASS   = o-parola-noua-pe-care-o-alegi-tu
 ```
 
-Apoi fa un redeploy (Settings -> Deployments -> ... -> Redeploy), ca sa
-preia noua variabila.
+**Important:** codul are valori de rezerva (`Vladuutz` / parola din discutie)
+ca sa mearga din prima daca uiti variabilele astea, dar daca proiectul
+ajunge vreodata intr-un repo public pe GitHub, parola de rezerva devine
+vizibila oricui. Seteaza `ADMIN_USER` si `ADMIN_PASS` aici, cu o parola
+noua, si ignora-le pe cele din cod.
 
-## 4. Testeaza
+Apoi fa un redeploy (Deployments -> ... -> Redeploy), ca sa preia noile
+variabile.
+
+## 4. Panou vizual de administrare (genereaza/revoca licente din browser)
+
+Dupa deploy, mergi la:
+
+```
+https://NUME-PROIECT.vercel.app/admin
+```
+
+Te loghezi cu `ADMIN_USER` / `ADMIN_PASS` (cele din Environment Variables,
+sau cele de rezerva daca nu le-ai setat inca). De acolo poti:
+
+- **Genera o licenta noua** - completezi domeniul clientului, numarul de
+  zile si o nota optionala, apoi apesi "Genereaza".
+- **Vedea toate licentele** create, cu status (valida / expirata / revocata).
+- **Revoca** o licenta cu un click (ex. clientul nu a mai platit).
+- **Reactiva** o licenta revocata, tot cu un click.
+
+Sesiunea de login tine 12 ore (cookie securizat), dupa care trebuie sa te
+loghezi din nou.
+
+## 5. Testeaza din linia de comanda (optional)
+
+Daca preferi `curl` in loc de panoul vizual, endpoint-urile vechi
+(`/api/admin/license` si `/api/admin/revoke`) tot functioneaza, dar cu
+`x-admin-secret` in loc de login:
 
 Dupa deploy, ai un URL gen `https://craftelite-licenses.vercel.app`.
 
@@ -77,7 +109,7 @@ curl -X POST https://craftelite-licenses.vercel.app/api/admin/revoke \
   -d '{"domain": "panoul-clientului.com"}'
 ```
 
-## 5. Integreaza in craftelite
+## 6. Integreaza in craftelite
 
 1. Copiaza `panel/license_check.php` in radacina panoului (langa
    `index.php` sau fisierul principal de bootstrap).
