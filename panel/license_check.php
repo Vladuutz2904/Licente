@@ -193,20 +193,108 @@ function license_activate(string $key): array
 }
 
 /** Pagina de activare / blocare, autonoma (fara tema panoului). */
+/** Pagina de activare / blocare, in stilul VladuutzWeb (autonoma, fara dependinte externe de fisiere). */
 function license_page(string $message, string $error = ''): void
 {
     http_response_code($error === '' ? 402 : 200);
     $h = fn($t) => htmlspecialchars((string) $t, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-    echo '<!doctype html><html lang="ro"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
-    echo '<title>Licenta</title><style>body{margin:0;min-height:100vh;display:grid;place-items:center;background:#0e0a08;color:#eee;font-family:system-ui,sans-serif}';
-    echo 'form{background:#1a1310;border:1px solid #2c211c;border-radius:14px;padding:28px;width:min(92vw,380px)}h1{margin:0 0 6px;font-size:20px}';
-    echo 'p{color:#b9a9a0;font-size:14px}input{width:100%;box-sizing:border-box;padding:11px;border-radius:9px;border:1px solid #3a2b25;background:#0d0908;color:#fff;font-size:15px;text-transform:uppercase;letter-spacing:.05em}';
-    echo 'button{margin-top:14px;width:100%;padding:11px;border:0;border-radius:9px;background:#e6402c;color:#fff;font-weight:700;font-size:15px;cursor:pointer}';
-    echo '.err{background:rgba(230,64,44,.15);color:#ff8a7a;padding:10px;border-radius:8px;margin:10px 0;font-size:13.5px}</style></head><body>';
-    echo '<form method="post"><h1>Licenta panou</h1><p>' . $h($message) . '</p>';
-    if ($error !== '') echo '<div class="err">' . $h($error) . '</div>';
-    echo '<input name="license_key" placeholder="CFTE-XXXX-XXXX-XXXX" maxlength="40" required autofocus>';
-    echo '<button type="submit">Activeaza licenta</button><p style="font-size:12px">Domeniu: ' . $h(license_domain()) . '</p></form></body></html>';
+    ?><!doctype html>
+<html lang="ro">
+<head>
+<meta charset="utf-8">
+<title>Licenta panou · VladuutzWeb</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#04070c">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  @property --ang { syntax: '<angle>'; initial-value: 0deg; inherits: false; }
+  :root {
+    color-scheme: dark;
+    --bg: #04070c; --card: rgba(16,22,34,.78); --border: rgba(120,160,210,.14);
+    --border-strong: rgba(120,170,230,.3); --fg: #eaf2fb; --muted: #8a98ad;
+    --cyan: #22e0f5; --blue: #1f8fe6; --orange: #ff8a1f; --ok: #2ee6b0; --danger: #ff5d6c;
+    --brand: linear-gradient(135deg,#22e0f5,#1f8fe6);
+    --font: 'Inter',-apple-system,'Segoe UI',sans-serif;
+    --font-d: 'Montserrat','Inter',sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; min-height: 100%; }
+  body {
+    min-height: 100vh; min-height: 100dvh; display: flex; align-items: center; justify-content: center;
+    padding: 28px 20px; position: relative; overflow-x: hidden;
+    background: radial-gradient(ellipse 80% 60% at 50% 0%, #0b1a2c 0%, transparent 70%), var(--bg);
+    color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased;
+  }
+  .aurora { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .aurora i { position: absolute; border-radius: 50%; filter: blur(80px); opacity: .5; }
+  .aurora .a1 { width: 480px; height: 480px; background: #1f8fe6; top: -160px; left: -140px; }
+  .aurora .a2 { width: 420px; height: 420px; background: #22e0f5; bottom: -180px; right: -120px; opacity: .3; }
+  .wrap { position: relative; z-index: 1; width: 100%; max-width: 400px; }
+  .tagline { display: inline-flex; align-items: center; gap: 7px; font-size: 10.5px; font-weight: 700; letter-spacing: .14em; color: var(--cyan); background: rgba(34,224,245,.08); border: 1px solid rgba(34,224,245,.2); padding: 5px 10px; border-radius: 99px; margin-bottom: 16px; }
+  .tagline::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--ok); box-shadow: 0 0 8px var(--ok); animation: blink 2s infinite; }
+  @keyframes blink { 50% { opacity: .35; } }
+  .card {
+    position: relative; background: linear-gradient(180deg, rgba(20,28,43,.82), rgba(12,18,29,.9));
+    backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); border-radius: 22px;
+    padding: 32px 30px 28px; box-shadow: 0 30px 90px rgba(0,0,0,.6), inset 0 1px 0 rgba(255,255,255,.05);
+  }
+  .card::before {
+    content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 1px; pointer-events: none;
+    background: conic-gradient(from var(--ang), rgba(34,224,245,0), rgba(34,224,245,.75), rgba(31,143,230,0) 30%, rgba(255,138,31,.7) 55%, rgba(255,138,31,0) 70%, rgba(34,224,245,0));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; animation: rotate-border 7s linear infinite;
+  }
+  @keyframes rotate-border { to { --ang: 360deg; } }
+  .lock { width: 50px; height: 50px; margin-bottom: 16px; border-radius: 15px; display: grid; place-items: center; color: var(--cyan); background: rgba(34,224,245,.1); border: 1px solid rgba(34,224,245,.25); }
+  .lock svg { width: 23px; height: 23px; stroke: currentColor; fill: none; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+  h1 { font-family: var(--font-d); font-size: 21px; font-weight: 700; letter-spacing: -.2px; margin: 0 0 6px; }
+  .hint { color: var(--muted); font-size: 13.5px; margin: 0 0 22px; line-height: 1.5; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 7px; font-weight: 500; }
+  input {
+    width: 100%; background: rgba(5,9,15,.7); border: 1px solid var(--border); color: var(--fg);
+    padding: 12px 14px; border-radius: 12px; font-size: 15px; text-transform: uppercase; letter-spacing: .05em;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input::placeholder { color: #4b586b; text-transform: none; letter-spacing: normal; }
+  input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 0 4px rgba(34,224,245,.12); }
+  button {
+    width: 100%; margin-top: 8px; border: none; border-radius: 12px; background: var(--brand);
+    color: #04101a; font-weight: 700; font-size: 15px; padding: 13px; cursor: pointer;
+    position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(31,143,230,.38);
+    transition: transform .15s, box-shadow .2s; font-family: inherit;
+  }
+  button::after { content: ''; position: absolute; top: 0; left: -120%; width: 60%; height: 100%; background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent); transform: skewX(-20deg); transition: left .6s; }
+  button:hover { transform: translateY(-1px); box-shadow: 0 14px 38px rgba(34,224,245,.42); }
+  button:hover::after { left: 140%; }
+  button:active { transform: scale(.97); }
+  .err { margin-top: 14px; font-size: 13px; color: var(--danger); background: rgba(255,93,108,.09); border: 1px solid rgba(255,93,108,.25); border-radius: 10px; padding: 10px 12px; }
+  .foot { margin-top: 18px; font-size: 11.5px; color: #4f5d72; text-align: center; letter-spacing: .02em; }
+  .foot b { color: var(--muted); font-weight: 600; }
+</style>
+</head>
+<body>
+  <div class="aurora" aria-hidden="true"><i class="a1"></i><i class="a2"></i></div>
+  <div class="wrap">
+    <span class="tagline">LICENTA PANOU</span>
+    <form class="card" method="post">
+      <div class="lock"><svg viewBox="0 0 24 24"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4M12 15v2"/></svg></div>
+      <h1>Licenta panoului</h1>
+      <p class="hint"><?= $h($message) ?></p>
+      <?php if ($error !== ''): ?><div class="err"><?= $h($error) ?></div><?php endif; ?>
+      <div class="field">
+        <label for="license_key">Cheie licenta</label>
+        <input id="license_key" name="license_key" placeholder="CFTE-XXXX-XXXX-XXXX" maxlength="40" required autofocus autocapitalize="characters" spellcheck="false">
+      </div>
+      <button type="submit">Activeaza licenta</button>
+      <p class="foot">Domeniu: <b><?= $h(license_domain()) ?></b> · VladuutzWeb</p>
+    </form>
+  </div>
+</body>
+</html><?php
     exit;
 }
 
